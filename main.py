@@ -74,6 +74,6 @@ def main():
     #status do pedido
     print(f"\nStatus final do pedido: {pedido_joao._status}")
 
-    #garantindo funcionamento do codigo
-    if __name__ == "__main__":
-        main()
+#garantindo funcionamento do codigo
+if __name__ == "__main__":
+    main()
