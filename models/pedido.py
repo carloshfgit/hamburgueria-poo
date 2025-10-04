@@ -8,7 +8,7 @@ class Pedido:
     def __init__(self, cliente: Cliente):
         self._cliente = cliente
         self._itens: List[ItemPedido] = []
-        self.status: str = "Recebido"
+        self._status: str = "Recebido"
 
     def adicionar_item(self, produto: Produto, quantidade: int):
         #aplicando polimorfismo
