@@ -37,4 +37,22 @@ O projeto foi estruturado para exemplificar os 4 pilares da POO e outras relaç�
 
 ## 📂 Estrutura de Arquivos
 
-![[Pasted image 20251004180542.png]]
+O projeto está organizado com a seguinte estrutura de diretórios para separar as responsabilidades:
+
+```bash
+hamburgueria_poo/
+│
+├── models/
+│   ├── __init__.py
+│   ├── produto.py
+│   ├── hamburguer.py
+│   ├── bebida.py
+│   ├── acompanhamento.py
+│   ├── endereco.py
+│   ├── cliente.py
+│   ├── item_pedido.py
+│   ├── pedido.py
+│   └── processador_pagamento.py
+│
+├── main.py
+└── README.md
