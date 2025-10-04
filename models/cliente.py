@@ -3,7 +3,7 @@ from .endereco import Endereco
 class Cliente:
 
     def __init__(self, nome: str, telefone: str, endereco: Endereco):
-        self.nome = nome
+        self._nome = nome
         self._telefone = telefone
         self._endereco = endereco
 
