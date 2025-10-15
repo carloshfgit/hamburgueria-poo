@@ -7,6 +7,6 @@ class Hamburguer(Produto):
         self._ingredientes = ingredientes
 
     def __str__(self) -> str:
-        # Podemos reusar o __str__ da classe pai e adicionar mais informações
+        #
         base_str = super().__str__()
         return f"{base_str} (Ingredientes: {', '.join(self._ingredientes)})"
