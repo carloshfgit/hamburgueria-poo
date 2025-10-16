@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 #classe mãe abstrata que vai ser usada como molde para os itens do cardápio
 class Produto(ABC):
 
+    #usamos _(underline) para atributos protegidos, encapsulamento
     def __init__(self, nome: str, preco: float, desc: str):
         self._nome = nome
         self._preco = preco
