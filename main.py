@@ -63,11 +63,11 @@ def main():
     pedido_joao.adicionar_item(coca_cola, 2)
     pedido_joao.adicionar_item(fritas_g, 1)
 
-    #exibindo resumo do pedido
+    #exibindo resumo do pedido, printando Pedido com o metodo __str__
     print("\nResumo do Pedido:")
     print(pedido_joao)
 
-    #pagamento
+    #pagamento, aqui o status do pedido é atualizado
     processador = ProcessadorPagamento()
     processador.processar(pedido=pedido_joao, forma_pagamento="Cartão de Crédito")
     

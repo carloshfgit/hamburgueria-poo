@@ -2,6 +2,7 @@ from .endereco import Endereco
 
 class Cliente:
 
+    #usa o objeto endereço como atributo de cliente
     def __init__(self, nome: str, telefone: str, endereco: Endereco):
         self._nome = nome
         self._telefone = telefone
