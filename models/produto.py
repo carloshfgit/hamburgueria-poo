@@ -1,5 +1,3 @@
-# Arquivo: models/produto.py
-
 from abc import ABC, abstractmethod
 
 #classe mãe abstrata que vai ser usada como molde para os itens do cardápio
