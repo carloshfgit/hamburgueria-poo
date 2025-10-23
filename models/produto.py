@@ -11,7 +11,7 @@ class Produto(ABC):
         self._preco = preco
         self._descricao = desc
 
-    # <<< MUDANÇA: "Getters" (Propriedades) para encapsulamento >>>
+    #exemplos de getters, propriedades de encapsulamento
     @property
     def nome(self) -> str:
         return self._nome
@@ -24,11 +24,6 @@ class Produto(ABC):
     def descricao(self) -> str:
         return self._descricao
 
-    # <<< MUDANÇA: Método get_preco() removido >>>
-    # O método abaixo não é mais necessário, pois foi substituído pela @property preco
-    # def get_preco(self) -> float:
-    #     return self._preco
-    
+    #retorna a representação do produto
     def __str__(self) -> str:
-        # <<< MUDANÇA: Usando as próprias propriedades (boa prática) >>>
         return f"{self.nome} - R$ {self.preco:.2f}"

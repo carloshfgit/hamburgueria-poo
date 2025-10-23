@@ -1,5 +1,3 @@
-# Arquivo: models/cliente.py
-
 from .endereco import Endereco
 
 class Cliente:
@@ -10,7 +8,7 @@ class Cliente:
         self._telefone = telefone
         self._endereco = endereco
 
-    # <<< MUDANÇA: Propriedades (Getters) para encapsulamento >>>
+    #exemplos de getters, propriedades de encapsulamento
     @property
     def nome(self) -> str:
         return self._nome
@@ -24,5 +22,4 @@ class Cliente:
         return self._endereco
 
     def __str__(self) -> str:
-        # <<< MUDANÇA: Usando as próprias propriedades (boa prática) >>>
         return f"Cliente: {self.nome}, Tel: {self.telefone}\nEndereço: {self.endereco}"
