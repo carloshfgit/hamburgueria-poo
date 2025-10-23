@@ -83,8 +83,9 @@ def exibir_cardapio(cardapio):
     print("\n--- Cardápio Disponível ---")
     for i, produto in enumerate(cardapio):
         
-        print(f"{i + 1}. {produto._nome} ({produto._descricao}) - R${produto.get_preco():.2f}")
-
+        # <<< MUDANÇA: de _nome, _descricao e get_preco() para .nome, .descricao e .preco >>>
+        print(f"{i + 1}. {produto.nome} ({produto.descricao}) - R${produto.preco:.2f}")
+        
 def pausar_e_limpar():
     """
     Pausa a execução e espera o usuário pressionar Enter.
@@ -201,7 +202,7 @@ def criar_pedido(lista_pedidos, lista_clientes, cardapio):
             while True:
                 try:
                     # --- CORREÇÃO AQUI ---
-                    quantidade = int(input(f"Quantidade de '{produto_selecionado._nome}': "))
+                    quantidade = int(input(f"Quantidade de '{produto_selecionado.nome}': "))
                     if quantidade > 0:
                         break
                     else:
@@ -214,7 +215,7 @@ def criar_pedido(lista_pedidos, lista_clientes, cardapio):
             
             # --- CORREÇÃO AQUI ---
             # O app.py agora é responsável pela mensagem de feedback
-            print(f"✅ {quantidade}x {produto_selecionado._nome} adicionado(s).")
+            print(f"✅ {quantidade}x {produto_selecionado.nome} adicionado(s).")
             # <<< MUDANÇA: Correção de calcular_total() para .total >>>
             # Usando a @property 'total' definida em pedido.py
             print(f"Subtotal atual: R${novo_pedido.total:.2f}") 
