@@ -266,15 +266,15 @@ def listar_clientes(lista_clientes):
         
     for i, cliente in enumerate(lista_clientes):
         
-        # <<< MUDANÇA: de _endereco para .endereco >>>
+        # Esta linha já está correta (graças ao refatoramento anterior)
         endereco = cliente.endereco
         
-        # !!! ATENÇÃO: Esta linha agora quebra o encapsulamento de Endereco !!!
-        # (Ver explicação abaixo)
-        end_str = f"{endereco._rua}, {endereco._numero} - {endereco._bairro}, {endereco._cidade}"
+        # <<< MUDANÇA: de _rua, _numero, etc. para .rua, .numero, etc. >>>
+        # Agora o encapsulamento de Endereco está sendo respeitado!
+        end_str = f"{endereco.rua}, {endereco.numero} - {endereco.bairro}, {endereco.cidade}"
         
         print(f"\n--- Cliente {i + 1} ---")
-        # <<< MUDANÇA: de _nome e _telefone para .nome e .telefone >>>
+        # Estas linhas já estão corretas (graças ao refatoramento anterior)
         print(f"Nome: {cliente.nome}")
         print(f"Telefone: {cliente.telefone}")
         print(f"Endereço: {end_str}")
