@@ -1,5 +1,3 @@
-# Arquivo: models/pedido.py
-
 from .cliente import Cliente
 from .item_pedido import ItemPedido
 from .produto import Produto
