@@ -10,14 +10,14 @@ from models.acompanhamento import Acompanhamento
 from models.endereco import Endereco
 
 # --- 1. Funções de "Setup" ---
-# (Sem mudanças aqui)
+
 def carregar_cardapio():
     """
     Cria e retorna a lista de produtos disponíveis (nosso cardápio).
     """
     print("Carregando cardápio...")
     
-    # Produtos do cardápio (movidos da sua main original)
+    # Produtos do cardápio 
     x_tudo = Hamburguer(
         nome="X-Tudo Monstro",
         preco=25.50,
@@ -63,7 +63,7 @@ def carregar_cardapio():
     return [x_tudo, x_salada, coca_cola, suco_maracuja, fritas_g, nuggets_g]
 
 # --- 2. Funções Auxiliares (Exibição) ---
-# (Sem mudanças aqui, mas note as "CORREÇÕES" que você já tinha)
+
 def exibir_menu_principal():
     """
     Exibe as opções principais do sistema para o operador.
@@ -82,9 +82,7 @@ def exibir_cardapio(cardapio):
     """
     print("\n--- Cardápio Disponível ---")
     for i, produto in enumerate(cardapio):
-        # --- CORREÇÃO AQUI ---
-        # Usamos _nome, _descricao e get_preco() conforme definido em produto.py
-        # (Idealmente, produto também teria propriedades .nome, .descricao, .preco)
+        
         print(f"{i + 1}. {produto._nome} ({produto._descricao}) - R${produto.get_preco():.2f}")
 
 def pausar_e_limpar():
@@ -98,7 +96,7 @@ def pausar_e_limpar():
 
 # --- 3. Funções de Funcionalidades ---
 
-# (Sem mudanças em cadastrar_cliente)
+
 def cadastrar_cliente(lista_clientes):
     """
     Pede os dados, cria um novo Cliente e Endereco, e o adiciona à lista.
@@ -114,7 +112,7 @@ def cadastrar_cliente(lista_clientes):
     cidade = input("Cidade: ")
     
     try:
-        # Assumindo que Endereco e Cliente também usam encapsulamento
+        
         novo_endereco = Endereco(rua=rua, numero=numero, bairro=bairro, cidade=cidade)
         novo_cliente = Cliente(nome=nome, telefone=telefone, endereco=novo_endereco)
         
@@ -125,7 +123,7 @@ def cadastrar_cliente(lista_clientes):
         print(f"\n❌ Erro ao cadastrar cliente: {e}")
         return None
 
-# (Sem mudanças em selecionar_cliente)
+
 def selecionar_cliente(lista_clientes):
     """
     Exibe os clientes cadastrados e permite ao operador selecionar um ou cadastrar um novo.
@@ -137,10 +135,9 @@ def selecionar_cliente(lista_clientes):
 
     print("\n--- Selecionar Cliente ---")
     for i, cliente in enumerate(lista_clientes):
-        # --- CORREÇÃO AQUI ---
-        # Assumindo que Cliente usa _nome e _telefone
-        # (Idealmente, cliente teria propriedades .nome e .telefone)
-        print(f"{i + 1}. {cliente._nome} ({cliente._telefone})")
+        
+        # <<< MUDANÇA: de _nome e _telefone para .nome e .telefone >>>
+        print(f"{i + 1}. {cliente.nome} ({cliente.telefone})")
     
     print("-------------------------")
     print("N. Cadastrar NOVO cliente")
@@ -155,8 +152,9 @@ def selecionar_cliente(lista_clientes):
             indice = int(escolha) - 1
             if 0 <= indice < len(lista_clientes):
                 cliente_selecionado = lista_clientes[indice]
-                # --- CORREÇÃO AQUI ---
-                print(f"Cliente '{cliente_selecionado._nome}' selecionado.")
+                
+                # <<< MUDANÇA: de _nome para .nome >>>
+                print(f"Cliente '{cliente_selecionado.nome}' selecionado.")
                 return cliente_selecionado
             else:
                 print("Número inválido. Tente novamente.")
@@ -267,18 +265,22 @@ def listar_clientes(lista_clientes):
         return
         
     for i, cliente in enumerate(lista_clientes):
-        # --- CORREÇÃO AQUI ---
-        # (Idealmente, Cliente e Endereco teriam propriedades)
-        endereco = cliente._endereco 
+        
+        # <<< MUDANÇA: de _endereco para .endereco >>>
+        endereco = cliente.endereco
+        
+        # !!! ATENÇÃO: Esta linha agora quebra o encapsulamento de Endereco !!!
+        # (Ver explicação abaixo)
         end_str = f"{endereco._rua}, {endereco._numero} - {endereco._bairro}, {endereco._cidade}"
         
         print(f"\n--- Cliente {i + 1} ---")
-        print(f"Nome: {cliente._nome}")
-        print(f"Telefone: {cliente._telefone}")
+        # <<< MUDANÇA: de _nome e _telefone para .nome e .telefone >>>
+        print(f"Nome: {cliente.nome}")
+        print(f"Telefone: {cliente.telefone}")
         print(f"Endereço: {end_str}")
         print("-" * 20)
 
-# <<< MUDANÇA GERAL: Função inteira refatorada >>>
+
 def cancelar_pedido(lista_pedidos):
     """
     Permite ao operador selecionar um pedido e alterar seu status para 'Cancelado'.
@@ -291,10 +293,9 @@ def cancelar_pedido(lista_pedidos):
     
     # Lista pedidos para escolha
     for i, pedido in enumerate(lista_pedidos):
-        # <<< MUDANÇAS: Usando .cliente.nome, .status, e .total >>>
-        # (Assumindo que Cliente tem uma propriedade .nome)
-        print(f"{i + 1}. Pedido de {pedido.cliente._nome} (Status: {pedido.status}) - Total: R${pedido.total:.2f}")
-        # Se cliente não tiver .nome, mantenha pedido._cliente._nome por enquanto
+        # <<< MUDANÇA: de pedido.cliente._nome para pedido.cliente.nome >>>
+        print(f"{i + 1}. Pedido de {pedido.cliente.nome} (Status: {pedido.status}) - Total: R${pedido.total:.2f}")
+
     
     try:
         escolha = int(input("\nDigite o número do pedido que deseja cancelar: "))
@@ -307,7 +308,7 @@ def cancelar_pedido(lista_pedidos):
         pedido_a_cancelar = lista_pedidos[indice]
         
         # <<< MUDANÇA: Delegação da lógica para o modelo >>>
-        # Em vez de um IF/ELIF aqui, chamamos o método do objeto
+
         resultado = pedido_a_cancelar.cancelar()
         
         # O app.py (Visão) agora só exibe a mensagem com base no resultado
@@ -325,7 +326,7 @@ def cancelar_pedido(lista_pedidos):
         print(f"Ocorreu um erro: {e}")
 
 # --- 4. Função Principal (Loop do Aplicativo) ---
-# (Sem mudanças aqui)
+
 def iniciar_sistema(): 
     """
     Função principal que roda o loop do aplicativo de caixa.
