@@ -1,12 +1,9 @@
-# Importa apenas a função principal do nosso aplicativo
+#este arquivo serve apenas para ligar o sistema
 from app import iniciar_sistema
 
 def main():
-    """
-    Ponto de entrada principal do programa.
-    """
+    #chama a função principal de app.py
     iniciar_sistema()
 
-# Garantia de execução
 if __name__ == "__main__":
     main()
