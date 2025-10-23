@@ -71,3 +71,13 @@ class Pedido:
             f"TOTAL DO PEDIDO: R$ {self.total:.2f}\n"
             f"----------------"
         )
+    
+    def marcar_como_pago(self):
+        """
+        Altera o status do pedido para 'Pago'.
+        Este método é a interface pública para permitir que 
+        outras classes (como o ProcessadorPagamento) 
+        informem ao pedido que ele foi pago.
+        """
+        # A própria classe Pedido é responsável por mudar seu estado.
+        self._status = "Pago"
