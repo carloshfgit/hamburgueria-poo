@@ -54,5 +54,6 @@ hamburgueria_poo/
 │   ├── pedido.py
 │   └── processador_pagamento.py
 │
+├── app.py
 ├── main.py
 └── README.md

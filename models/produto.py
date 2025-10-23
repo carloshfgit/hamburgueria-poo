@@ -9,7 +9,7 @@ class Produto(ABC):
         self._preco = preco
         self._descricao = desc
 
-    #garante encapsulamento, retorna o preço protegido do produto em vez de acessáço diretamente
+    #garante encapsulamento, retorna o preço protegido do produto em vez de acessá-lo diretamente
     def get_preco(self) -> float:
         return self._preco
     
