@@ -53,7 +53,7 @@ class Pedido:
         return (
             f"--- Pedido ---\n"
             f"{self.cliente}\n" 
-            f"Status: {self.status}\n" # <<< MUDANÇA: Usa self.status
+            f"Status: {self.status}\n" 
             f"--- Itens ---\n"
             f"{itens_str}\n"
             f"----------------\n"
