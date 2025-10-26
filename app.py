@@ -61,9 +61,7 @@ def carregar_cardapio():
 #funções de exibição do menu
 
 def exibir_menu_principal():
-    """
-    Exibe as opções principais do sistema para o operador.
-    """
+
     print("\n--- 🍔 Hamburgueria POO - Sistema do Caixa 🍔 ---")
     print("1. Criar Novo Pedido")
     print("2. Cadastrar Novo Cliente")
@@ -283,9 +281,7 @@ def cancelar_pedido(lista_pedidos):
 
 #função principal que garante o loop do aplicativo
 def iniciar_sistema(): 
-    """
-    Função principal que roda o loop do aplicativo de caixa.
-    """
+    
     #dados armazenados
     cardapio = carregar_cardapio()
     clientes = []

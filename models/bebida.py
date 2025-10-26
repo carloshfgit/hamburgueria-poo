@@ -8,5 +8,4 @@ class Bebida(Produto):
         self._volume_ml = volume_ml
 
     def __str__(self) -> str:
-        
         return f"{super().__str__()} - {self._volume_ml}ml"

@@ -1,5 +1,3 @@
-# Arquivo: models/endereco.py
-
 class Endereco:
 
     def __init__(self, rua: str, numero: int, bairro: str, cidade: str):
@@ -8,7 +6,7 @@ class Endereco:
         self._bairro = bairro
         self._cidade = cidade
 
-    # <<< MUDANÇA: Propriedades (Getters) para encapsulamento >>>
+    #getters para encapsulamento
     @property
     def rua(self) -> str:
         return self._rua
@@ -26,5 +24,4 @@ class Endereco:
         return self._cidade
 
     def __str__(self) -> str:
-        # <<< MUDANÇA: Usando as próprias propriedades (boa prática) >>>
         return f"{self.rua}, {self.numero} - {self.bairro}, {self.cidade}"
