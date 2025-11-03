@@ -297,10 +297,14 @@ def cancelar_pedido(lista_pedidos):
 #função principal que garante o loop do aplicativo
 def iniciar_sistema(): 
     
-    #dados armazenados
+    # --- Alterações aqui ---
+    # 1. Inicializa o DB (cria tabelas se não existirem)
+    database.init_db()
+    
+    # 2. Carrega dados do DB em vez de listas vazias
     cardapio = carregar_cardapio()
-    clientes = []
-    pedidos = []
+    clientes = database.carregar_clientes()
+    pedidos = database.carregar_pedidos(clientes)
     
     print("\nBem-vindo à Hamburgueria POO!")
 
