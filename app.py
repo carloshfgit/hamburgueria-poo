@@ -1,3 +1,4 @@
+import database
 from models.hamburguer import Hamburguer
 from models.bebida import Bebida
 from models.pedido import Pedido
@@ -100,11 +101,19 @@ def cadastrar_cliente(lista_clientes):
         novo_endereco = Endereco(rua=rua, numero=numero, bairro=bairro, cidade=cidade)
         novo_cliente = Cliente(nome=nome, telefone=telefone, endereco=novo_endereco)
         
+        # --- Alteração aqui ---
+        # Salva no banco de dados E atualiza o objeto com o ID
+        novo_cliente = database.salvar_cliente(novo_cliente)
+        
         lista_clientes.append(novo_cliente)
-        print(f"\n✅ Cliente '{nome}' cadastrado com sucesso!")
+        print(f"\n✅ Cliente '{nome}' cadastrado com sucesso (ID: {novo_cliente.id})!")
         return novo_cliente
     except Exception as e:
-        print(f"\n❌ Erro ao cadastrar cliente: {e}")
+        # Se o telefone for duplicado, o DB (UNIQUE) vai gerar um erro
+        if "UNIQUE constraint failed" in str(e):
+            print(f"\n❌ Erro: Telefone '{telefone}' já cadastrado.")
+        else:
+            print(f"\n❌ Erro ao cadastrar cliente: {e}")
         return None
 
 #exibe os clientes cadastrados e permite ao operador selecionar um ou cadastrar um novo.
@@ -203,9 +212,12 @@ def criar_pedido(lista_pedidos, lista_clientes, cardapio):
     processador = ProcessadorPagamento()
     processador.processar(pedido=novo_pedido, forma_pagamento=forma_pagamento)
     
-    #salva e confirma
+    # --- Alteração aqui ---
+    # Salva o pedido no banco de dados DEPOIS que ele foi pago
+    novo_pedido = database.salvar_pedido(novo_pedido)
+    # Salva na lista em memória
     lista_pedidos.append(novo_pedido)
-    print("\n✅ Pedido finalizado e pago com sucesso!")
+    print("\n✅ Pedido finalizado, pago e salvo no banco de dados!")
     print(f"Status final do pedido: {novo_pedido.status}")
 
 #exibe o histórico de pedidos
@@ -266,8 +278,11 @@ def cancelar_pedido(lista_pedidos):
         pedido_a_cancelar = lista_pedidos[indice]
         resultado = pedido_a_cancelar.cancelar()
         
-        if resultado == "sucesso":
-            print("✅ Pedido cancelado com sucesso.")
+        # --- Alteração aqui ---
+        # Se o cancelamento foi bem-sucedido, atualiza no DB
+        if resultado == "sucesso" or resultado == "cancelado_pago":
+            database.atualizar_status_pedido(pedido_a_cancelar)
+            print("✅ Pedido cancelado com sucesso (status atualizado no DB).")
         elif resultado == "ja_cancelado":
             print("Este pedido já está cancelado.")
         elif resultado == "cancelado_pago":
