@@ -3,12 +3,17 @@ from .endereco import Endereco
 class Cliente:
 
     #usa o objeto endereço como atributo de cliente
-    def __init__(self, nome: str, telefone: str, endereco: Endereco):
+    def __init__(self, nome: str, telefone: str, endereco: Endereco, id: int = None):
+        self._id = id
         self._nome = nome
         self._telefone = telefone
         self._endereco = endereco
 
     #exemplos de getters, propriedades de encapsulamento
+    @property
+    def id(self) -> int:
+        return self._id
+
     @property
     def nome(self) -> str:
         return self._nome

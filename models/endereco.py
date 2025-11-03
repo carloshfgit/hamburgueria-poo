@@ -1,12 +1,17 @@
 class Endereco:
 
-    def __init__(self, rua: str, numero: int, bairro: str, cidade: str):
+    def __init__(self, rua: str, numero: str, bairro: str, cidade: str, id: int = None):
+        self._id = id
         self._rua = rua
         self._numero = numero
         self._bairro = bairro
         self._cidade = cidade
 
     #getters para encapsulamento
+    @property
+    def id(self) -> int:
+        return self._id
+    
     @property
     def rua(self) -> str:
         return self._rua

@@ -6,12 +6,17 @@ from typing import List
 class Pedido:
 
     #associa Pedido a Cliente, chamando o objeto Cliente como atributo
-    def __init__(self, cliente: Cliente):
+    def __init__(self, cliente: Cliente, id: int = None):
+        self._id = id
         self._cliente = cliente
         self._itens: List[ItemPedido] = []
         self._status: str = "Recebido"
 
     #aqui temos exemplos de Getters
+    @property
+    def id(self) -> int:
+        return self._id
+    
     #permite que o app.py leia o status sem acessar o atributo privado
     @property
     def status(self) -> str:
