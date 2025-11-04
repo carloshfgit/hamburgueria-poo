@@ -6,7 +6,6 @@ from models.pedido import Pedido
 from models.item_pedido import ItemPedido
 from models.produto import Produto
 
-#iniciando o arquivo que vai armazenar os dados
 DATABASE_URL = "hamburgueria.db"
 
 #cria e retorna uma conexão com o banco de dados.
