@@ -101,6 +101,7 @@ def cadastrar_cliente(lista_clientes):
         novo_endereco = Endereco(rua=rua, numero=numero, bairro=bairro, cidade=cidade)
         novo_cliente = Cliente(nome=nome, telefone=telefone, endereco=novo_endereco)
         
+        #DB AQUI
         #salva no banco de dados E atualiza o objeto com o ID
         novo_cliente = database.salvar_cliente(novo_cliente)
         
@@ -211,8 +212,10 @@ def criar_pedido(lista_pedidos, lista_clientes, cardapio):
     processador = ProcessadorPagamento()
     processador.processar(pedido=novo_pedido, forma_pagamento=forma_pagamento)
     
+    #DB AQUI
     #salva o pedido no banco de dados depois do pagamento
     novo_pedido = database.salvar_pedido(novo_pedido)
+
     #salva na lista em memória
     lista_pedidos.append(novo_pedido)
     print("\n✅ Pedido finalizado, pago e salvo no banco de dados!")
@@ -276,6 +279,7 @@ def cancelar_pedido(lista_pedidos):
         pedido_a_cancelar = lista_pedidos[indice]
         resultado = pedido_a_cancelar.cancelar()
         
+        #DB AQUI
         #se o cancelamento foi bem-sucedido, atualiza no DB
         if resultado == "sucesso" or resultado == "cancelado_pago":
             database.atualizar_status_pedido(pedido_a_cancelar)
@@ -295,6 +299,7 @@ def cancelar_pedido(lista_pedidos):
 #função principal que garante o loop do aplicativo
 def iniciar_sistema(): 
     
+    #DB AQUI
     #inicializa o banco de dados e cria as tabelas se elas não existirem
     database.init_db()
     
