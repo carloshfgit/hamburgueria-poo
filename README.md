@@ -1,10 +1,10 @@
-# 🍔 Hamburgueria POO - Simulação em Python
+# Hamburgueria POO - Simulação em Python
 
-## 📝 Descrição do Projeto
+## Descrição do Projeto
 
 Este é um projeto acadêmico desenvolvido para aplicar e demonstrar os conceitos fundamentais da Programação Orientada a Objetos (POO) em Python. O sistema simula a gestão de pedidos de uma hamburgueria, desde a criação dos produtos até o processamento do pagamento.
 
-## ✨ Funcionalidades e Conceitos Aplicados
+## Funcionalidades e Conceitos Aplicados
 
 O projeto foi estruturado para exemplificar os 4 pilares da POO e outras relações importantes entre classes:
 
@@ -15,11 +15,12 @@ O projeto foi estruturado para exemplificar os 4 pilares da POO e outras relaç�
 * **Composição:** Relações fortes onde um objeto "possui" outro (ex: `Pedido` é composto por `ItemPedido`).
 * **Associação:** Relações mais fracas entre objetos (ex: `Cliente` faz um `Pedido`).
 
-## 💻 Tecnologias Utilizadas
+## Tecnologias Utilizadas
 
 * **Linguagem:** Python 3
+* **Banco de Dados:** SQLite
 
-## 🚀 Como Executar o Projeto
+## Como Executar o Projeto
 
 1.  **Clone o repositório (se estiver no Git) ou baixe os arquivos.**
 
@@ -35,7 +36,7 @@ O projeto foi estruturado para exemplificar os 4 pilares da POO e outras relaç�
 
 4.  **A saída da simulação será exibida no terminal.**
 
-## 📂 Estrutura de Arquivos
+## Estrutura de Arquivos
 
 O projeto está organizado com a seguinte estrutura de diretórios para separar as responsabilidades:
 
@@ -55,5 +56,7 @@ hamburgueria_poo/
 │   └── processador_pagamento.py
 │
 ├── app.py
+├── database.py
+├── hamburgueria.db
 ├── main.py
 └── README.md
