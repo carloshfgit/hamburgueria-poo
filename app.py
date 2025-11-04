@@ -101,15 +101,14 @@ def cadastrar_cliente(lista_clientes):
         novo_endereco = Endereco(rua=rua, numero=numero, bairro=bairro, cidade=cidade)
         novo_cliente = Cliente(nome=nome, telefone=telefone, endereco=novo_endereco)
         
-        # --- Alteração aqui ---
-        # Salva no banco de dados E atualiza o objeto com o ID
+        #salva no banco de dados E atualiza o objeto com o ID
         novo_cliente = database.salvar_cliente(novo_cliente)
         
         lista_clientes.append(novo_cliente)
         print(f"\n✅ Cliente '{nome}' cadastrado com sucesso (ID: {novo_cliente.id})!")
         return novo_cliente
     except Exception as e:
-        # Se o telefone for duplicado, o DB (UNIQUE) vai gerar um erro
+        #gera uma mensagem de erro caso o telefone seja duplicado
         if "UNIQUE constraint failed" in str(e):
             print(f"\n❌ Erro: Telefone '{telefone}' já cadastrado.")
         else:
@@ -212,10 +211,9 @@ def criar_pedido(lista_pedidos, lista_clientes, cardapio):
     processador = ProcessadorPagamento()
     processador.processar(pedido=novo_pedido, forma_pagamento=forma_pagamento)
     
-    # --- Alteração aqui ---
-    # Salva o pedido no banco de dados DEPOIS que ele foi pago
+    #salva o pedido no banco de dados depois do pagamento
     novo_pedido = database.salvar_pedido(novo_pedido)
-    # Salva na lista em memória
+    #salva na lista em memória
     lista_pedidos.append(novo_pedido)
     print("\n✅ Pedido finalizado, pago e salvo no banco de dados!")
     print(f"Status final do pedido: {novo_pedido.status}")
@@ -278,10 +276,10 @@ def cancelar_pedido(lista_pedidos):
         pedido_a_cancelar = lista_pedidos[indice]
         resultado = pedido_a_cancelar.cancelar()
         
-        # --- Alteração aqui ---
-        # Se o cancelamento foi bem-sucedido, atualiza no DB
+        #se o cancelamento foi bem-sucedido, atualiza no DB
         if resultado == "sucesso" or resultado == "cancelado_pago":
             database.atualizar_status_pedido(pedido_a_cancelar)
+
             print("✅ Pedido cancelado com sucesso (status atualizado no DB).")
         elif resultado == "ja_cancelado":
             print("Este pedido já está cancelado.")
@@ -297,11 +295,10 @@ def cancelar_pedido(lista_pedidos):
 #função principal que garante o loop do aplicativo
 def iniciar_sistema(): 
     
-    # --- Alterações aqui ---
-    # 1. Inicializa o DB (cria tabelas se não existirem)
+    #inicializa o banco de dados e cria as tabelas se elas não existirem
     database.init_db()
     
-    # 2. Carrega dados do DB em vez de listas vazias
+    #carega os dados do banco de dados
     cardapio = carregar_cardapio()
     clientes = database.carregar_clientes()
     pedidos = database.carregar_pedidos(clientes)

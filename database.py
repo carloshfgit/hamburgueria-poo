@@ -1,9 +1,5 @@
-# hamburgueria_poo/database.py
-
 import sqlite3
 from typing import List, Dict
-
-# Importe seus modelos
 from models.cliente import Cliente
 from models.endereco import Endereco
 from models.pedido import Pedido
