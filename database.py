@@ -4,19 +4,21 @@ from models.cliente import Cliente
 from models.endereco import Endereco
 from models.pedido import Pedido
 from models.item_pedido import ItemPedido
-from models.produto import Produto # Precisamos disto para recriar os itens
+from models.produto import Produto
 
+#iniciando o arquivo que vai armazenar os dados
 DATABASE_URL = "hamburgueria.db"
 
+#cria e retorna uma conexão com o banco de dados.
 def get_db_connection():
-    """Cria e retorna uma conexão com o banco de dados."""
     conn = sqlite3.connect(DATABASE_URL)
-    # Isso faz com que os resultados venham como dicionários (melhor para mapear)
+    #isso faz com que os resultados venham como dicionários (melhor para mapear)
     conn.row_factory = sqlite3.Row 
     return conn
 
+#cria as tabelas do banco de dados se elas não existirem.
 def init_db():
-    """Cria as tabelas do banco de dados se elas não existirem."""
+    
     conn = get_db_connection()
     cursor = conn.cursor()
     
@@ -69,30 +71,31 @@ def init_db():
     conn.close()
     print("Banco de dados inicializado.")
 
-    # --- Funções de Cliente ---
+    #aqui começamos a implementar as funções
 
+#FUNÇÕES DE CLIENTES
 def salvar_cliente(cliente: Cliente) -> Cliente:
     """Salva um novo cliente e seu endereço no DB."""
     conn = get_db_connection()
     cursor = conn.cursor()
     
-    # 1. Salvar o Endereço primeiro
+    #salvando o endereço
     end = cliente.endereco
     cursor.execute(
         "INSERT INTO enderecos (rua, numero, bairro, cidade) VALUES (?, ?, ?, ?)",
         (end.rua, end.numero, end.bairro, end.cidade)
     )
     endereco_id = cursor.lastrowid
-    # Atualiza o ID no objeto
+    #atualiza o id
     end._id = endereco_id 
     
-    # 2. Salvar o Cliente com o ID do endereço
+    #salvando cliente com o id do endereço
     cursor.execute(
         "INSERT INTO clientes (nome, telefone, endereco_id) VALUES (?, ?, ?)",
         (cliente.nome, cliente.telefone, endereco_id)
     )
     cliente_id = cursor.lastrowid
-    # Atualiza o ID no objeto
+    #atualiza id do cliente
     cliente._id = cliente_id
     
     conn.commit()
@@ -101,8 +104,9 @@ def salvar_cliente(cliente: Cliente) -> Cliente:
     print(f"Cliente '{cliente.nome}' (ID: {cliente.id}) salvo.")
     return cliente
 
+#carrega todos os clientes e seus endereços do DB
 def carregar_clientes() -> List[Cliente]:
-    """Carrega todos os clientes e seus endereços do DB."""
+    
     conn = get_db_connection()
     cursor = conn.cursor()
     
@@ -134,23 +138,23 @@ def carregar_clientes() -> List[Cliente]:
     print(f"Carregados {len(clientes)} clientes.")
     return clientes
 
-# --- Funções de Pedido ---
 
+#FUNÇÕES DE PEDIDOS
 def salvar_pedido(pedido: Pedido) -> Pedido:
     """Salva um novo pedido e seus itens no DB."""
     conn = get_db_connection()
     cursor = conn.cursor()
     
-    # 1. Salvar o Pedido principal
+    #salvando o pedido principal
     cursor.execute(
         "INSERT INTO pedidos (cliente_id, status, total) VALUES (?, ?, ?)",
         (pedido.cliente.id, pedido.status, pedido.total)
     )
     pedido_id = cursor.lastrowid
-    pedido._id = pedido_id # Atualiza o ID no objeto
+    pedido._id = pedido_id #atualiza o id do pedido
     
-    # 2. Salvar os Itens do Pedido
-    for item in pedido._itens: # Acessando o atributo privado (idealmente teria um getter)
+    #salvando os itens do pedido
+    for item in pedido._itens:
         cursor.execute(
             "INSERT INTO itens_pedido (pedido_id, produto_nome, produto_preco, quantidade) VALUES (?, ?, ?, ?)",
             (pedido_id, item.produto.nome, item.produto.preco, item.quantidade)
@@ -161,8 +165,9 @@ def salvar_pedido(pedido: Pedido) -> Pedido:
     print(f"Pedido ID: {pedido.id} salvo.")
     return pedido
 
+#atualiza o status do pedido
 def atualizar_status_pedido(pedido: Pedido):
-    """Atualiza o status de um pedido existente (ex: para 'Cancelado')."""
+    
     conn = get_db_connection()
     cursor = conn.cursor()
     
@@ -175,16 +180,16 @@ def atualizar_status_pedido(pedido: Pedido):
     conn.close()
     print(f"Status do Pedido ID: {pedido.id} atualizado para '{pedido.status}'.")
 
+#carrega todos os pedidos e seus itens do DB
 def carregar_pedidos(clientes: List[Cliente]) -> List[Pedido]:
-    """Carrega todos os pedidos e seus itens do DB."""
     
-    # Cria um mapa de ID -> Objeto Cliente para fácil acesso
+    #criando um mapa de id
     clientes_map: Dict[int, Cliente] = {c.id: c for c in clientes}
     
     conn = get_db_connection()
     cursor = conn.cursor()
     
-    # 1. Carregar todos os pedidos
+    #carregando os pedidos
     cursor.execute("SELECT * FROM pedidos ORDER BY id")
     pedidos_rows = cursor.fetchall()
     
@@ -197,22 +202,22 @@ def carregar_pedidos(clientes: List[Cliente]) -> List[Pedido]:
             continue
             
         pedido = Pedido(cliente=cliente_obj, id=row['id'])
-        pedido._status = row['status'] # Atualiza o status
+        pedido._status = row['status'] #atualiza o status
         pedidos_map[pedido.id] = pedido
 
-    # 2. Carregar todos os itens e associá-los aos pedidos
+    #carrega todos os itens e os associa aos pedidos
     cursor.execute("SELECT * FROM itens_pedido")
     itens_rows = cursor.fetchall()
     
     for item_row in itens_rows:
         pedido = pedidos_map.get(item_row['pedido_id'])
         if pedido:
-            # Recria um objeto "Produto" genérico com os dados salvos
-            # Isso é suficiente para calcular total e exibir o nome
+            #recria um objeto "Produto" genérico com os dados salvos
+            #isso é suficiente para calcular total e exibir o nome
             produto_db = Produto(
                 nome=item_row['produto_nome'],
                 preco=item_row['produto_preco'],
-                desc="" # Descrição não foi salva, mas não é crítica
+                desc="" 
             )
             item_db = ItemPedido(produto=produto_db, quantidade=item_row['quantidade'])
             pedido._itens.append(item_db)
