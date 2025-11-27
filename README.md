@@ -1,62 +1,58 @@
-# Hamburgueria POO - Simulação em Python
+# Hamburgueria POO - Sistema de Gestão de Pedidos
 
-## Descrição do Projeto
 
-Este é um projeto acadêmico desenvolvido para aplicar e demonstrar os conceitos fundamentais da Programação Orientada a Objetos (POO) em Python. O sistema simula a gestão de pedidos de uma hamburgueria, desde a criação dos produtos até o processamento do pagamento.
+## Sobre o Projeto
 
-## Funcionalidades e Conceitos Aplicados
+Este projeto é uma simulação de um sistema de gerenciamento para uma hamburgueria, desenvolvido com o objetivo principal de aplicar conceitos avançados de **Programação Orientada a Objetos (POO)** e **Arquitetura de Software**.
 
-O projeto foi estruturado para exemplificar os 4 pilares da POO e outras relações importantes entre classes:
+O sistema permite o cadastro de clientes, criação de pedidos complexos (hambúrgueres, bebidas, acompanhamentos), simulação de pagamentos e persistência de dados, tudo estruturado para seguir boas práticas de engenharia de software (SOLID).
 
-* **Abstração:** A classe `Produto` é abstrata, definindo um modelo comum que não pode ser instanciado diretamente.
-* **Herança:** As classes `Hamburguer`, `Bebida` e `Acompanhamento` herdam características da classe `Produto`.
-* **Encapsulamento:** Os atributos das classes são protegidos (convenção `_` e `__`), e o acesso é feito por meio de métodos públicos, garantindo a integridade dos dados.
-* **Polimorfismo:** A classe `Pedido` trabalha com uma lista de `Produto`, tratando objetos de diferentes classes (`Hamburguer`, `Bebida`, etc.) de maneira uniforme, por exemplo, ao calcular o total do pedido.
-* **Composição:** Relações fortes onde um objeto "possui" outro (ex: `Pedido` é composto por `ItemPedido`).
-* **Associação:** Relações mais fracas entre objetos (ex: `Cliente` faz um `Pedido`).
+---
 
-## Tecnologias Utilizadas
+## Arquitetura e Tecnologias
 
-* **Linguagem:** Python 3
-* **Banco de Dados:** SQLite
+O projeto evoluiu de um script procedural para uma **Arquitetura em Camadas (Layered Architecture)**, visando desacoplamento e escalabilidade.
 
-## Como Executar o Projeto
+### Estrutura de Camadas
+* **Models:** Classes de domínio que representam as entidades do negócio (Cliente, Pedido, Produto) com seus comportamentos e regras de estado.
+* **Repositories:** Responsáveis exclusivamente pela persistência de dados e comunicação SQL com o banco de dados (SQLite).
+* **Services:** Camada de regras de negócio. Orquestra as validações, cálculos e chama os repositórios.
+* **Controllers:** Gerenciam o fluxo da aplicação, recebendo inputs da View e delegando para os Services.
+* **Views:** Responsável pela interação com o usuário. Atualmente via Console (CLI), mas preparada para migração futura para Interface Gráfica (Tkinter).
 
-1.  **Clone o repositório (se estiver no Git) ou baixe os arquivos.**
+### Conceitos de POO Aplicados
+* **Abstração:** Uso de classes base (como `Produto`) para definir contratos.
+* **Herança:** Especialização de classes (`Hamburguer`, `Bebida` herdam de `Produto`).
+* **Encapsulamento:** Proteção de atributos e uso de Properties.
+* **Polimorfismo:** Tratamento genérico de itens no pedido, independente do tipo específico.
 
-2.  **Navegue até a pasta raiz do projeto:**
-    ```bash
-    cd hamburgueria_poo
-    ```
+---
 
-3.  **Execute o arquivo principal para iniciar a simulação:**
-    ```bash
-    python3 main.py
-    ```
+## Funcionalidades
 
-4.  **A saída da simulação será exibida no terminal.**
+-  **Cadastro de Clientes:** Registro com validação de unicidade (telefone) e endereço vinculado.
+-  **Gestão de Pedidos:**
+    - Adição de múltiplos itens.
+    - Cálculo automático de subtotal e total.
+    - Histórico de pedidos por cliente.
+-  **Persistência de Dados:** Todos os registros são salvos automaticamente em banco de dados SQLite (`hamburgueria.db`).
+-  **Controle de Status:** Fluxo de estados do pedido (Recebido -> Pago -> Cancelado).
+-  **Histórico de Preços:** O sistema grava o preço do item no momento da venda, garantindo integridade histórica mesmo se o cardápio mudar.
+
+---
 
 ## Estrutura de Arquivos
 
-O projeto está organizado com a seguinte estrutura de diretórios para separar as responsabilidades:
-
-```bash
+```text
 hamburgueria_poo/
 │
-├── models/
-│   ├── __init__.py
-│   ├── produto.py
-│   ├── hamburguer.py
-│   ├── bebida.py
-│   ├── acompanhamento.py
-│   ├── endereco.py
-│   ├── cliente.py
-│   ├── item_pedido.py
-│   ├── pedido.py
-│   └── processador_pagamento.py
+├── controllers/         # Controladores de fluxo (MainController)
+├── models/              # Entidades (Cliente, Pedido, Produto, etc.)
+├── repositories/        # Acesso a Dados (SQL Operations)
+├── services/            # Regras de Negócio (ClienteService, PedidoService)
+├── views/               # Interfaces (ConsoleView)
 │
-├── app.py
-├── database.py
-├── hamburgueria.db
-├── main.py
-└── README.md
+├── database.py          # Configuração e conexão com SQLite
+├── main.py              # Ponto de entrada da aplicação
+├── hamburgueria.db      # Arquivo do Banco de Dados (gerado automaticamente)
+└── UML-hamburgueriaa-poo.png # Diagrama de Classes
