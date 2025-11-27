@@ -1,18 +1,35 @@
 from services.cliente_service import ClienteService
 from services.pedido_service import PedidoService
+from repositories.cliente_repository import ClienteRepository
+from repositories.pedido_repository import PedidoRepository
+from models.processador_pagamento import ProcessadorPagamento
 from views.console_view import ConsoleView
-from models.hamburguer import Hamburguer # Apenas para carregar cardapio fake
+from models.hamburguer import Hamburguer
 from models.bebida import Bebida
+from repositories.produto_repository import ProdutoRepository
 
 class MainController:
 
     def __init__(self):
-        self.cliente_service = ClienteService()
-        self.pedido_service = PedidoService()
+        # 1. Instancia as dependências "de baixo nível"
+        self.cliente_repo = ClienteRepository()
+        self.pedido_repo = PedidoRepository()
+        
+        # --- VERIFIQUE SE ESTA LINHA ABAIXO ESTÁ PRESENTE ---
+        self.produto_repo = ProdutoRepository() 
+        # ----------------------------------------------------
+
+        self.pagamento_proc = ProcessadorPagamento()
+        
+        # 2. Injeta as dependências nos Services
+        self.cliente_service = ClienteService(self.cliente_repo)
+        self.pedido_service = PedidoService(self.pedido_repo, self.pagamento_proc)
+        
         self.view = ConsoleView()
         
-        # Simulando cardapio (idealmente viria de um ProdutoService/Repository)
-        self.cardapio = self._carregar_cardapio_fake()
+        # 3. Usa o repositório (Isso aqui estava dando erro porque a linha acima faltava)
+        self.produto_repo.salvar_padroes_se_vazio()
+        self.cardapio = self.produto_repo.buscar_todos()
 
     def iniciar(self):
         while True:
@@ -23,6 +40,7 @@ class MainController:
             elif opcao == '2':
                 self._fluxo_cadastrar_cliente()
             elif opcao == '3':
+                # Note que agora o service já tem o repo dentro dele
                 pedidos = self.pedido_service.listar_pedidos(self.cliente_service.listar_clientes())
                 self.view.listar_pedidos(pedidos)
                 self.view.pausar()
@@ -105,10 +123,3 @@ class MainController:
             resultado = self.pedido_service.cancelar_pedido(pedido)
             self.view.mostrar_mensagem(f"Resultado do cancelamento: {resultado}")
         self.view.pausar()
-
-    def _carregar_cardapio_fake(self):
-        # Mantive hardcoded como no seu original, mas encapsulado aqui
-        return [
-            Hamburguer("X-Monstro", 25.50, "Completo", ["Bacon", "Ovo"]),
-            Bebida("Coca-Cola", 8.00, "Lata", 350)
-        ]

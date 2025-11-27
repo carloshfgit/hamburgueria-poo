@@ -49,14 +49,32 @@ def init_db():
     """)
     
     # Tabela para Itens de um Pedido
+    # Adicionamos 'produto_tipo' e 'produto_detalhes'
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS itens_pedido (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         pedido_id INTEGER NOT NULL,
         produto_nome TEXT NOT NULL,
         produto_preco REAL NOT NULL,
+        produto_tipo TEXT NOT NULL,      
+        produto_detalhes TEXT,           
         quantidade INTEGER NOT NULL,
         FOREIGN KEY (pedido_id) REFERENCES pedidos (id)
+    )
+    """)
+
+    # Tabela para Produtos (Cardápio)
+    # Colocamos colunas para TODOS os tipos. Se for bebida, ingredientes fica NULL.
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS produtos (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        tipo TEXT NOT NULL, 
+        nome TEXT NOT NULL,
+        preco REAL NOT NULL,
+        descricao TEXT,
+        ingredientes TEXT, 
+        volume_ml INTEGER,
+        tamanho TEXT
     )
     """)
     

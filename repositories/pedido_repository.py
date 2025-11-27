@@ -4,6 +4,9 @@ from models.item_pedido import ItemPedido
 from models.produto import Produto
 from models.cliente import Cliente
 from database import get_db_connection
+from models.hamburguer import Hamburguer
+from models.bebida import Bebida
+from models.acompanhamento import Acompanhamento
 
 class PedidoRepository:
 
@@ -11,19 +14,37 @@ class PedidoRepository:
         conn = get_db_connection()
         cursor = conn.cursor()
         
-        # Salva o pedido
         cursor.execute(
             "INSERT INTO pedidos (cliente_id, status, total) VALUES (?, ?, ?)",
             (pedido.cliente.id, pedido.status, pedido.total)
         )
         pedido._id = cursor.lastrowid
         
-        # Salva os itens
+        # Salva os itens com polimorfismo
         for item in pedido._itens:
-            cursor.execute(
-                "INSERT INTO itens_pedido (pedido_id, produto_nome, produto_preco, quantidade) VALUES (?, ?, ?, ?)",
-                (pedido.id, item.produto.nome, item.produto.preco, item.quantidade)
-            )
+            prod = item.produto
+            tipo = ""
+            detalhes = ""
+            
+            # Lógica para extrair os detalhes baseada na classe
+            if isinstance(prod, Hamburguer):
+                tipo = "Hamburguer"
+                # Salva ingredientes como string separada por vírgula
+                detalhes = ",".join(prod._ingredientes) 
+            elif isinstance(prod, Bebida):
+                tipo = "Bebida"
+                detalhes = str(prod._volume_ml)
+            elif isinstance(prod, Acompanhamento):
+                tipo = "Acompanhamento"
+                detalhes = prod._tamanho
+            else:
+                tipo = "Produto" # Fallback
+            
+            cursor.execute("""
+                INSERT INTO itens_pedido 
+                (pedido_id, produto_nome, produto_preco, produto_tipo, produto_detalhes, quantidade) 
+                VALUES (?, ?, ?, ?, ?, ?)
+            """, (pedido.id, prod.nome, prod.preco, tipo, detalhes, item.quantidade))
             
         conn.commit()
         conn.close()
@@ -64,20 +85,37 @@ class PedidoRepository:
             pedido._status = row['status']
             pedidos_map[pedido.id] = pedido
 
-        # Busca itens e associa aos pedidos
+       # Busca itens e associa aos pedidos
         cursor.execute("SELECT * FROM itens_pedido")
         itens_rows = cursor.fetchall()
         
         for item_row in itens_rows:
             pedido = pedidos_map.get(item_row['pedido_id'])
             if pedido:
-                produto_dummy = Produto(
-                    nome=item_row['produto_nome'],
-                    preco=item_row['produto_preco'],
-                    desc="" 
-                )
-                item = ItemPedido(produto=produto_dummy, quantidade=item_row['quantidade'])
-                pedido._itens.append(item)
+                nome = item_row['produto_nome']
+                preco = item_row['produto_preco']
+                tipo = item_row['produto_tipo']
+                detalhes = item_row['produto_detalhes']
+                
+                produto_recuperado = None
+                
+                # Reconstrói o objeto correto
+                if tipo == "Hamburguer":
+                    ingredientes = detalhes.split(",") if detalhes else []
+                    produto_recuperado = Hamburguer(nome, preco, "Histórico", ingredientes)
+                elif tipo == "Bebida":
+                    volume = int(detalhes) if detalhes else 0
+                    produto_recuperado = Bebida(nome, preco, "Histórico", volume)
+                elif tipo == "Acompanhamento":
+                    produto_recuperado = Acompanhamento(nome, preco, "Histórico", detalhes)
+                else:
+                    # Fallback genérico se for algo antigo ou desconhecido
+                    produto_recuperado = Produto(nome, preco, "Histórico")
+
+                # Adiciona ao pedido
+                # Nota: precisamos passar o objeto Produto real agora!
+                item_obj = ItemPedido(produto=produto_recuperado, quantidade=item_row['quantidade'])
+                pedido._itens.append(item_obj)
                 
         conn.close()
         return list(pedidos_map.values())
