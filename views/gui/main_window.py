@@ -324,13 +324,25 @@ class MainWindow(tk.Tk):
     # =======================================================
     
     def _setup_aba_historico(self):
-        btn_refresh = ttk.Button(self.frame_historico, text="🔄 Atualizar Lista", command=self._atualizar_historico)
-        btn_refresh.pack(pady=10, padx=10, anchor='e')
+        # Frame de topo para Botões de Ação
+        frame_acoes = tk.Frame(self.frame_historico)
+        frame_acoes.pack(fill='x', padx=10, pady=5)
 
+        btn_refresh = ttk.Button(frame_acoes, text="🔄 Atualizar", command=self._atualizar_historico)
+        btn_refresh.pack(side='right', padx=5)
+
+        # Novos Botões
+        btn_detalhes = ttk.Button(frame_acoes, text="📄 Ver Itens", command=self._ver_detalhes_pedido)
+        btn_detalhes.pack(side='left', padx=5)
+
+        btn_cancelar = ttk.Button(frame_acoes, text="🚫 Cancelar Pedido", command=self._cancelar_pedido_gui)
+        btn_cancelar.pack(side='left', padx=5)
+
+        # Tabela (Treeview)
         colunas = ('id', 'cliente', 'total', 'status')
         self.tree_historico = ttk.Treeview(self.frame_historico, columns=colunas, show='headings')
         
-        self.tree_historico.heading('id', text='ID Pedido')
+        self.tree_historico.heading('id', text='ID')
         self.tree_historico.heading('cliente', text='Cliente')
         self.tree_historico.heading('total', text='Total')
         self.tree_historico.heading('status', text='Status')
@@ -345,16 +357,85 @@ class MainWindow(tk.Tk):
         
         self.tree_historico.pack(fill='both', expand=True, padx=10, pady=5)
         scrollbar.pack(side='right', fill='y')
+        
+        # Opcional: Bind para duplo clique abrir detalhes
+        self.tree_historico.bind("<Double-1>", lambda e: self._ver_detalhes_pedido())
 
     def _atualizar_historico(self):
         for item in self.tree_historico.get_children():
             self.tree_historico.delete(item)
             
         clientes = self.cliente_service.listar_clientes()
-        pedidos = self.pedido_service.listar_pedidos(clientes)
+        # Salva no self para podermos buscar o objeto completo depois (incluindo os itens)
+        self.pedidos_cache = self.pedido_service.listar_pedidos(clientes)
         
-        for p in pedidos:
-            self.tree_historico.insert('', 'end', values=(p.id, p.cliente.nome, f"R$ {p.total:.2f}", p.status))
+        for p in self.pedidos_cache:
+            # Usamos o iid=p.id para facilitar a busca
+            self.tree_historico.insert('', 'end', iid=p.id, values=(p.id, p.cliente.nome, f"R$ {p.total:.2f}", p.status))
+
+    def _ver_detalhes_pedido(self):
+        selecionado_id = self.tree_historico.focus() # Retorna o iid (que definimos como o ID do pedido)
+        if not selecionado_id:
+            return
+        
+        # Busca o objeto pedido no cache
+        pedido_obj = next((p for p in self.pedidos_cache if str(p.id) == selecionado_id), None)
+        
+        if not pedido_obj:
+            return
+
+        # Cria Janela Pop-up (Modal)
+        janela_det = Toplevel(self)
+        janela_det.title(f"Itens do Pedido #{pedido_obj.id}")
+        janela_det.geometry("400x300")
+        
+        ttk.Label(janela_det, text=f"Cliente: {pedido_obj.cliente.nome}", font=('Arial', 10, 'bold')).pack(pady=5)
+        
+        # Lista simples dos itens
+        tree_itens = ttk.Treeview(janela_det, columns=('prod', 'qtd', 'sub'), show='headings')
+        tree_itens.heading('prod', text='Produto')
+        tree_itens.heading('qtd', text='Qtd')
+        tree_itens.heading('sub', text='Subtotal')
+        
+        tree_itens.column('prod', width=200)
+        tree_itens.column('qtd', width=50, anchor='center')
+        tree_itens.column('sub', width=80)
+        
+        tree_itens.pack(fill='both', expand=True, padx=10, pady=5)
+        
+        for item in pedido_obj._itens:
+            tree_itens.insert('', 'end', values=(item.produto.nome, item.quantidade, f"R$ {item.subtotal:.2f}"))
+            
+        ttk.Label(janela_det, text=f"Total Pago: R$ {pedido_obj.total:.2f}", font=('Arial', 11, 'bold')).pack(pady=10)
+
+    def _cancelar_pedido_gui(self):
+        selecionado_id = self.tree_historico.focus()
+        if not selecionado_id:
+            messagebox.showwarning("Aviso", "Selecione um pedido para cancelar.")
+            return
+
+        pedido_obj = next((p for p in self.pedidos_cache if str(p.id) == selecionado_id), None)
+        
+        if not pedido_obj:
+            return
+            
+        if pedido_obj.status == "Cancelado":
+            messagebox.showinfo("Info", "Este pedido já está cancelado.")
+            return
+
+        confirmar = messagebox.askyesno("Confirmar", f"Deseja cancelar o pedido #{pedido_obj.id} de {pedido_obj.cliente.nome}?")
+        if confirmar:
+            msg_resultado = self.pedido_service.cancelar_pedido(pedido_obj)
+            
+            if msg_resultado == "sucesso":
+                messagebox.showinfo("Sucesso", "Pedido cancelado com sucesso!")
+            elif msg_resultado == "cancelado_pago":
+                messagebox.showinfo("Sucesso", "Pedido PAGO foi estornado e cancelado.")
+            else:
+                messagebox.showinfo("Aviso", "Pedido já estava cancelado.")
+            
+            # Atualiza a lista para mostrar o novo status
+            self._atualizar_historico()
 
 if __name__ == "__main__":
     from database import init_db
