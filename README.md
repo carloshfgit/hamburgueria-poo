@@ -63,7 +63,7 @@ O projeto segue estritamente a **Layered Architecture** (Arquitetura em Camadas)
 hamburgueria-poo/
 │
 ├── models/              # Entidades do Domínio (Regras de Estado)
-│   ├── cliente.py       # Ex: Cliente, Endereco
+│   ├── cliente.py       # Ex: Cliente
 │   ├── pedido.py        # Lógica de totais e itens
 │   ├── produto.py       # Classe Abstrata (Herança)
 │   └── ...
