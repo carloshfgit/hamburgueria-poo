@@ -4,30 +4,22 @@ from repositories.cliente_repository import ClienteRepository
 from repositories.pedido_repository import PedidoRepository
 from models.processador_pagamento import ProcessadorPagamento
 from views.console.console_view import ConsoleView
-from models.hamburguer import Hamburguer
-from models.bebida import Bebida
 from repositories.produto_repository import ProdutoRepository
 
 class MainController:
 
     def __init__(self):
-        # 1. Instancia as dependências "de baixo nível"
         self.cliente_repo = ClienteRepository()
         self.pedido_repo = PedidoRepository()
-        
-        # --- VERIFIQUE SE ESTA LINHA ABAIXO ESTÁ PRESENTE ---
         self.produto_repo = ProdutoRepository() 
-        # ----------------------------------------------------
 
         self.pagamento_proc = ProcessadorPagamento()
         
-        # 2. Injeta as dependências nos Services
         self.cliente_service = ClienteService(self.cliente_repo)
         self.pedido_service = PedidoService(self.pedido_repo, self.pagamento_proc)
         
         self.view = ConsoleView()
         
-        # 3. Usa o repositório (Isso aqui estava dando erro porque a linha acima faltava)
         self.produto_repo.salvar_padroes_se_vazio()
         self.cardapio = self.produto_repo.buscar_todos()
 
@@ -40,7 +32,6 @@ class MainController:
             elif opcao == '2':
                 self._fluxo_cadastrar_cliente()
             elif opcao == '3':
-                # Note que agora o service já tem o repo dentro dele
                 pedidos = self.pedido_service.listar_pedidos(self.cliente_service.listar_clientes())
                 self.view.listar_pedidos(pedidos)
                 self.view.pausar()
@@ -59,12 +50,10 @@ class MainController:
     def _fluxo_cadastrar_cliente(self):
         dados = self.view.obter_dados_cliente()
         try:
+            # Chamada simplificada: Apenas Nome, Telefone e Cidade
             cliente = self.cliente_service.cadastrar_cliente(
                 nome=dados['nome'], 
                 telefone=dados['telefone'],
-                rua=dados['rua'],
-                numero=dados['numero'],
-                bairro=dados['bairro'],
                 cidade=dados['cidade']
             )
             self.view.mostrar_mensagem(f"Cliente {cliente.nome} cadastrado com sucesso!")
@@ -79,7 +68,7 @@ class MainController:
         
         if cliente_selecionado == 'N':
             self._fluxo_cadastrar_cliente()
-            return # Retorna para o menu para tentar de novo
+            return 
         
         if not cliente_selecionado:
             return
@@ -114,7 +103,6 @@ class MainController:
         self.view.pausar()
 
     def _fluxo_cancelar_pedido(self):
-        # Carregar pedidos
         clientes = self.cliente_service.listar_clientes()
         pedidos = self.pedido_service.listar_pedidos(clientes)
         

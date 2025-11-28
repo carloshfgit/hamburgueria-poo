@@ -1,30 +1,22 @@
 from typing import List
 from models.cliente import Cliente
-from models.endereco import Endereco
+# A importação de Endereco foi removida pois a classe não é mais usada aqui
 from database import get_db_connection
 
 class ClienteRepository:
 
     def salvar(self, cliente: Cliente) -> Cliente:
-        """Salva um novo cliente e seu endereço no banco."""
+        """Salva um novo cliente diretamente com a cidade na tabela clientes."""
         conn = get_db_connection()
         cursor = conn.cursor()
         
-        # 1. Salvar endereço
-        end = cliente.endereco
+        # 1. Mudança Principal: Inserção direta (sem criar endereço antes)
         cursor.execute(
-            "INSERT INTO enderecos (rua, numero, bairro, cidade) VALUES (?, ?, ?, ?)",
-            (end.rua, end.numero, end.bairro, end.cidade)
+            "INSERT INTO clientes (nome, telefone, cidade) VALUES (?, ?, ?)",
+            (cliente.nome, cliente.telefone, cliente.cidade)
         )
-        # Recupera o ID gerado para o endereço
-        end._id = cursor.lastrowid 
         
-        # 2. Salvar cliente usando o ID do endereço
-        cursor.execute(
-            "INSERT INTO clientes (nome, telefone, endereco_id) VALUES (?, ?, ?)",
-            (cliente.nome, cliente.telefone, end.id)
-        )
-        # Recupera o ID gerado para o cliente
+        # Recupera o ID gerado automaticamente pelo banco
         cliente._id = cursor.lastrowid
         
         conn.commit()
@@ -34,31 +26,22 @@ class ClienteRepository:
         return cliente
 
     def buscar_todos(self) -> List[Cliente]:
-        """Carrega todos os clientes e seus endereços."""
+        """Carrega todos os clientes de forma simples (sem JOIN)."""
         conn = get_db_connection()
         cursor = conn.cursor()
         
-        cursor.execute("""
-            SELECT c.id as cliente_id, c.nome, c.telefone,
-                   e.id as endereco_id, e.rua, e.numero, e.bairro, e.cidade
-            FROM clientes c
-            JOIN enderecos e ON c.endereco_id = e.id
-        """)
+        # 2. Mudança Principal: SELECT simples, sem JOIN com tabela de endereços
+        cursor.execute("SELECT id, nome, telefone, cidade FROM clientes")
         
         clientes = []
         for row in cursor.fetchall():
-            endereco = Endereco(
-                id=row['endereco_id'],
-                rua=row['rua'],
-                numero=row['numero'],
-                bairro=row['bairro'],
-                cidade=row['cidade']
-            )
+            # Instancia o Cliente passando a string 'cidade' diretamente
+            # Certifique-se que seu __init__ no model espera (nome, telefone, cidade, id)
             cliente = Cliente(
-                id=row['cliente_id'],
+                id=row['id'],
                 nome=row['nome'],
                 telefone=row['telefone'],
-                endereco=endereco
+                cidade=row['cidade']
             )
             clientes.append(cliente)
             

@@ -41,73 +41,66 @@ class MainWindow(tk.Tk):
         # Frames das Abas
         self.frame_clientes = tk.Frame(self.notebook)
         self.frame_pedidos = tk.Frame(self.notebook)
-        self.frame_historico = tk.Frame(self.notebook) # Nova Aba
+        self.frame_historico = tk.Frame(self.notebook)
         
         self.notebook.add(self.frame_clientes, text="Gestão de Clientes")
         self.notebook.add(self.frame_pedidos, text="Novo Pedido")
-        self.notebook.add(self.frame_historico, text="Histórico de Vendas") # Nova Aba
+        self.notebook.add(self.frame_historico, text="Histórico de Vendas")
 
         # Setup de cada aba
         self._setup_aba_clientes()
         self._setup_aba_pedidos()
-        self._setup_aba_historico() # Nova função
+        self._setup_aba_historico()
         
         # Cargas iniciais
         self._atualizar_lista_clientes()
         self._atualizar_combo_clientes()
         self._atualizar_cardapio()
-        self._atualizar_historico() # Nova função
+        self._atualizar_historico()
 
     # =======================================================
-    #                   ABA CLIENTES
+    #                   ABA CLIENTES (REFATORADA)
     # =======================================================
     def _setup_aba_clientes(self):
         # Formulário
         lbl_frame_form = ttk.LabelFrame(self.frame_clientes, text="Cadastrar Novo Cliente")
         lbl_frame_form.pack(fill='x', padx=10, pady=5)
 
+        # Linha 0: Nome
         ttk.Label(lbl_frame_form, text="Nome:").grid(row=0, column=0, padx=5, pady=5, sticky='e')
         self.entry_nome = ttk.Entry(lbl_frame_form, width=30)
         self.entry_nome.grid(row=0, column=1, padx=5, pady=5)
 
+        # Linha 0: Telefone
         ttk.Label(lbl_frame_form, text="Telefone:").grid(row=0, column=2, padx=5, pady=5, sticky='e')
         self.entry_telefone = ttk.Entry(lbl_frame_form, width=20)
         self.entry_telefone.grid(row=0, column=3, padx=5, pady=5)
 
-        ttk.Label(lbl_frame_form, text="Rua:").grid(row=1, column=0, padx=5, pady=5, sticky='e')
-        self.entry_rua = ttk.Entry(lbl_frame_form, width=25)
-        self.entry_rua.grid(row=1, column=1, padx=5, pady=5)
+        # Linha 1: Cidade (Simplificado)
+        ttk.Label(lbl_frame_form, text="Cidade:").grid(row=1, column=0, padx=5, pady=5, sticky='e')
+        self.entry_cidade = ttk.Entry(lbl_frame_form, width=30)
+        self.entry_cidade.grid(row=1, column=1, padx=5, pady=5, sticky='w')
 
-        ttk.Label(lbl_frame_form, text="Nº:").grid(row=1, column=2, padx=5, pady=5, sticky='e')
-        self.entry_numero = ttk.Entry(lbl_frame_form, width=10)
-        self.entry_numero.grid(row=1, column=3, padx=5, pady=5, sticky='w')
-
-        ttk.Label(lbl_frame_form, text="Bairro:").grid(row=1, column=4, padx=5, pady=5, sticky='e')
-        self.entry_bairro = ttk.Entry(lbl_frame_form, width=20)
-        self.entry_bairro.grid(row=1, column=5, padx=5, pady=5)
-        
-        ttk.Label(lbl_frame_form, text="Cidade:").grid(row=1, column=6, padx=5, pady=5, sticky='e')
-        self.entry_cidade = ttk.Entry(lbl_frame_form, width=20)
-        self.entry_cidade.grid(row=1, column=7, padx=5, pady=5)
-
+        # Botão Salvar
         btn_salvar = ttk.Button(lbl_frame_form, text="Salvar Cliente", command=self._salvar_cliente)
-        btn_salvar.grid(row=2, column=0, columnspan=8, pady=10)
+        btn_salvar.grid(row=2, column=0, columnspan=4, pady=10)
 
         # Listagem
         lbl_frame_lista = ttk.LabelFrame(self.frame_clientes, text="Clientes Cadastrados")
         lbl_frame_lista.pack(fill='both', expand=True, padx=10, pady=5)
 
-        colunas = ('id', 'nome', 'telefone', 'endereco')
+        # Ajuste nas colunas: 'endereco' foi substituído por 'cidade'
+        colunas = ('id', 'nome', 'telefone', 'cidade')
         self.tree_clientes = ttk.Treeview(lbl_frame_lista, columns=colunas, show='headings')
         self.tree_clientes.heading('id', text='ID')
         self.tree_clientes.heading('nome', text='Nome')
         self.tree_clientes.heading('telefone', text='Telefone')
-        self.tree_clientes.heading('endereco', text='Endereço')
+        self.tree_clientes.heading('cidade', text='Cidade')
         
         self.tree_clientes.column('id', width=40)
         self.tree_clientes.column('nome', width=200)
         self.tree_clientes.column('telefone', width=120)
-        self.tree_clientes.column('endereco', width=400)
+        self.tree_clientes.column('cidade', width=200)
 
         scrollbar = ttk.Scrollbar(lbl_frame_lista, orient="vertical", command=self.tree_clientes.yview)
         self.tree_clientes.configure(yscroll=scrollbar.set)
@@ -118,15 +111,16 @@ class MainWindow(tk.Tk):
         try:
             nome = self.entry_nome.get()
             tel = self.entry_telefone.get()
-            # ... outros campos
-            if not nome or not tel:
-                messagebox.showwarning("Aviso", "Nome e Telefone são obrigatórios!")
+            cidade = self.entry_cidade.get()
+            
+            # Validação simples
+            if not nome or not tel or not cidade:
+                messagebox.showwarning("Aviso", "Todos os campos (Nome, Telefone, Cidade) são obrigatórios!")
                 return
 
-            self.cliente_service.cadastrar_cliente(
-                nome, tel, self.entry_rua.get(), self.entry_numero.get(), 
-                self.entry_bairro.get(), self.entry_cidade.get()
-            )
+            # Chamada ao Service (agora com apenas 3 argumentos)
+            self.cliente_service.cadastrar_cliente(nome, tel, cidade)
+            
             messagebox.showinfo("Sucesso", f"Cliente {nome} cadastrado!")
             
             self._limpar_campos_cliente()
@@ -139,7 +133,8 @@ class MainWindow(tk.Tk):
             messagebox.showerror("Erro Crítico", f"Falha ao salvar: {e}")
 
     def _limpar_campos_cliente(self):
-        for entry in [self.entry_nome, self.entry_telefone, self.entry_rua, self.entry_numero, self.entry_bairro, self.entry_cidade]:
+        # Limpa apenas os campos que restaram
+        for entry in [self.entry_nome, self.entry_telefone, self.entry_cidade]:
             entry.delete(0, 'end')
 
     def _atualizar_lista_clientes(self):
@@ -149,8 +144,8 @@ class MainWindow(tk.Tk):
         self.lista_clientes_cache = self.cliente_service.listar_clientes()
         
         for cli in self.lista_clientes_cache:
-            end_str = f"{cli.endereco.rua}, {cli.endereco.numero} - {cli.endereco.bairro}"
-            self.tree_clientes.insert('', 'end', values=(cli.id, cli.nome, cli.telefone, end_str))
+            # Exibe a cidade diretamente, sem formatação de endereço complexo
+            self.tree_clientes.insert('', 'end', values=(cli.id, cli.nome, cli.telefone, cli.cidade))
 
     # =======================================================
     #                   ABA PEDIDOS
@@ -213,13 +208,13 @@ class MainWindow(tk.Tk):
         self.lbl_total = ttk.Label(frame_footer, text="TOTAL: R$ 0.00", font=('Arial', 14, 'bold'), background="#f0f0f0")
         self.lbl_total.pack(side='right', padx=20)
 
-        # AGORA CONECTADO AO MÉTODO DE PAGAMENTO
         self.btn_finalizar = ttk.Button(frame_footer, text="Finalizar Pagamento", state="disabled", command=self._abrir_janela_pagamento)
         self.btn_finalizar.pack(side='right')
 
     def _atualizar_combo_clientes(self):
         self.lista_clientes_cache = self.cliente_service.listar_clientes()
-        valores = [f"{c.nome} ({c.telefone})" for c in self.lista_clientes_cache]
+        # Atualizado para mostrar cidade
+        valores = [f"{c.nome} ({c.telefone}) - {c.cidade}" for c in self.lista_clientes_cache]
         self.combo_clientes['values'] = valores
 
     def _atualizar_cardapio(self):
@@ -281,18 +276,17 @@ class MainWindow(tk.Tk):
             self.btn_finalizar.config(state="disabled")
 
     # =======================================================
-    #            LÓGICA DE PAGAMENTO (NOVO!)
+    #            LÓGICA DE PAGAMENTO
     # =======================================================
 
     def _abrir_janela_pagamento(self):
-        """Abre um pop-up (Toplevel) para escolher a forma de pagamento"""
         if not self.pedido_atual or self.pedido_atual.total <= 0:
             return
 
         janela_pgto = Toplevel(self)
         janela_pgto.title("Finalizar Pedido")
         janela_pgto.geometry("300x200")
-        janela_pgto.grab_set() # Foca na janela e impede clique na janela principal
+        janela_pgto.grab_set() 
 
         ttk.Label(janela_pgto, text=f"Total a Pagar: R$ {self.pedido_atual.total:.2f}", font=('Arial', 12, 'bold')).pack(pady=20)
         ttk.Label(janela_pgto, text="Escolha a forma de pagamento:").pack(pady=5)
@@ -300,29 +294,24 @@ class MainWindow(tk.Tk):
         frame_botoes = tk.Frame(janela_pgto)
         frame_botoes.pack(pady=10)
 
-        # Botões que chamam o método de conclusão com o argumento da string
         ttk.Button(frame_botoes, text="Dinheiro", command=lambda: self._concluir_pagamento("Dinheiro", janela_pgto)).pack(fill='x', pady=2)
         ttk.Button(frame_botoes, text="Cartão", command=lambda: self._concluir_pagamento("Cartão", janela_pgto)).pack(fill='x', pady=2)
         ttk.Button(frame_botoes, text="Pix", command=lambda: self._concluir_pagamento("Pix", janela_pgto)).pack(fill='x', pady=2)
 
     def _concluir_pagamento(self, forma: str, janela: Toplevel):
-        """Finaliza o pedido no Service e atualiza a UI"""
         try:
             sucesso = self.pedido_service.finalizar_pedido(self.pedido_atual, forma)
             
             if sucesso:
-                janela.destroy() # Fecha o pop-up
+                janela.destroy() 
                 messagebox.showinfo("Sucesso", f"Pagamento via {forma} confirmado!\nPedido Salvo.")
                 
-                # Reseta o fluxo de pedido
                 self.pedido_atual = None
                 self.combo_clientes.set('')
                 self.cliente_selecionado_obj = None
                 self._atualizar_carrinho_view()
                 
-                # Atualiza o histórico
                 self._atualizar_historico()
-                # Muda o foco para a aba de histórico para o usuário ver
                 self.notebook.select(self.frame_historico)
             else:
                 messagebox.showerror("Erro", "Falha ao processar pagamento.")
@@ -331,15 +320,13 @@ class MainWindow(tk.Tk):
             messagebox.showerror("Erro Crítico", f"Erro: {e}")
 
     # =======================================================
-    #            ABA HISTÓRICO (NOVO!)
+    #            ABA HISTÓRICO
     # =======================================================
     
     def _setup_aba_historico(self):
-        # Botão de Atualizar
         btn_refresh = ttk.Button(self.frame_historico, text="🔄 Atualizar Lista", command=self._atualizar_historico)
         btn_refresh.pack(pady=10, padx=10, anchor='e')
 
-        # Tabela
         colunas = ('id', 'cliente', 'total', 'status')
         self.tree_historico = ttk.Treeview(self.frame_historico, columns=colunas, show='headings')
         
@@ -360,16 +347,12 @@ class MainWindow(tk.Tk):
         scrollbar.pack(side='right', fill='y')
 
     def _atualizar_historico(self):
-        # Limpa
         for item in self.tree_historico.get_children():
             self.tree_historico.delete(item)
             
-        # Busca
-        # Precisamos passar a lista de clientes para o repo reconstruir os objetos
         clientes = self.cliente_service.listar_clientes()
         pedidos = self.pedido_service.listar_pedidos(clientes)
         
-        # Preenche
         for p in pedidos:
             self.tree_historico.insert('', 'end', values=(p.id, p.cliente.nome, f"R$ {p.total:.2f}", p.status))
 

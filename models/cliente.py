@@ -1,13 +1,11 @@
-from .endereco import Endereco
-
 class Cliente:
 
     #usa o objeto endereço como atributo de cliente
-    def __init__(self, nome: str, telefone: str, endereco: Endereco, id: int = None):
+    def __init__(self, nome: str, telefone: str, cidade: str, id: int = None):
         self._id = id
         self._nome = nome
         self._telefone = telefone
-        self._endereco = endereco
+        self._cidade = cidade
 
     #exemplos de getters, propriedades de encapsulamento
     @property
@@ -21,10 +19,10 @@ class Cliente:
     @property
     def telefone(self) -> str:
         return self._telefone
-
+    
     @property
-    def endereco(self) -> Endereco:
-        return self._endereco
+    def cidade(self) -> str:
+        return self._cidade
 
     def __str__(self) -> str:
-        return f"Cliente: {self.nome}, Tel: {self.telefone}\nEndereço: {self.endereco}"
+        return f"Cliente: {self.nome}, Tel: {self.telefone}\nCidade: {self.cidade}"

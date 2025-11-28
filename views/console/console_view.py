@@ -24,15 +24,12 @@ class ConsoleView:
     # --- CLIENTES ---
     
     def obter_dados_cliente(self) -> Dict[str, str]:
-        """Coleta dados do usuário e retorna um dicionário."""
+        """Coleta dados simplificados do usuário."""
         print("\n--- Cadastro de Novo Cliente ---")
         dados = {}
         dados['nome'] = input("Nome do cliente: ")
         dados['telefone'] = input("Telefone (ex: 11987654321): ")
-        print("Endereço:")
-        dados['rua'] = input("Rua: ")
-        dados['numero'] = input("Número: ") 
-        dados['bairro'] = input("Bairro: ")
+        # Agora pedimos apenas a cidade
         dados['cidade'] = input("Cidade: ")
         return dados
 
@@ -43,9 +40,8 @@ class ConsoleView:
             return
 
         for i, cliente in enumerate(clientes):
-            end = cliente.endereco
-            end_str = f"{end.rua}, {end.numero} - {end.bairro}, {end.cidade}"
-            print(f"{i + 1}. {cliente.nome} ({cliente.telefone}) - {end_str}")
+            # Exibição simplificada usando o atributo cidade direto
+            print(f"{i + 1}. {cliente.nome} ({cliente.telefone}) - {cliente.cidade}")
 
     def selecionar_cliente(self, clientes: List[Cliente]) -> Any:
         self.listar_clientes(clientes)
@@ -91,7 +87,7 @@ class ConsoleView:
             return 0
 
     def mostrar_resumo_pedido(self, pedido: Pedido):
-        print(f"\n{pedido}") # Usa o __str__ do Pedido
+        print(f"\n{pedido}") 
 
     def obter_forma_pagamento(self) -> str:
         return input("Forma de pagamento (Dinheiro/Cartão/Pix): ")
@@ -106,7 +102,6 @@ class ConsoleView:
         try:
             id_input = int(input("\nDigite o ID do pedido para cancelar (ou 0 para voltar): "))
             if id_input == 0: return None
-            # Busca simples na lista
             for p in pedidos:
                 if p.id == id_input:
                     return p

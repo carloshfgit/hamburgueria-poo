@@ -32,8 +32,7 @@ def init_db():
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         nome TEXT NOT NULL,
         telefone TEXT NOT NULL UNIQUE,
-        endereco_id INTEGER NOT NULL,
-        FOREIGN KEY (endereco_id) REFERENCES enderecos (id)
+        cidade TEXT NOT NULL
     )
     """)
     
