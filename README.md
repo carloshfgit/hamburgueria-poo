@@ -16,10 +16,13 @@ O diferencial técnico é a sua estrutura robusta, desacoplando a interface grá
 
 ###  Funcionalidades Principais
 
+###  Funcionalidades Principais
+
 * **Interface Gráfica Moderna:** Navegação por abas (Clientes, Pedidos, Histórico) desenvolvida com `Tkinter`.
-* **Gestão de Clientes:** Cadastro completo com validação de dados e endereço.
+* **Gestão de Clientes:** Cadastro completo com validação de dados.
 * **Cardápio Polimórfico:** Suporte a diferentes tipos de produtos (`Hamburguer`, `Bebida`, `Acompanhamento`) tratados de forma genérica pelo sistema.
 * **Carrinho de Compras:** Adição dinâmica de itens, cálculo de subtotal e total em tempo real.
+* **Gestão de Histórico:** Visualização detalhada dos itens de cada pedido e funcionalidade de **cancelamento de pedidos** com estorno de status.
 * **Pagamentos:** Simulação de pagamentos (Dinheiro, Cartão, Pix).
 * **Persistência de Dados:** Banco de dados SQLite (`hamburgueria.db`) gerado e gerenciado automaticamente.
 * **Modo Híbrido:** Possui tanto uma interface gráfica quanto uma versão em linha de comando (Console/CLI).
