@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import ttk, messagebox, Toplevel
 
 # Imports de Repositories
 from repositories.cliente_repository import ClienteRepository
@@ -17,23 +17,20 @@ class MainWindow(tk.Tk):
         super().__init__()
         
         self.title("Hamburgueria POO - Sistema Visual")
-        self.geometry("1000x700") # Aumentei um pouco para caber o pedido
+        self.geometry("1000x700")
 
         # --- 1. Injeção de Dependências ---
-        # Repositories
         self.cliente_repo = ClienteRepository()
         self.pedido_repo = PedidoRepository()
         self.produto_repo = ProdutoRepository()
         
-        # Garante que o cardápio exista (Seed)
         self.produto_repo.salvar_padroes_se_vazio()
 
-        # Services
         self.pagamento_proc = ProcessadorPagamento()
         self.cliente_service = ClienteService(self.cliente_repo)
         self.pedido_service = PedidoService(self.pedido_repo, self.pagamento_proc)
 
-        # Estado da Aplicação (Variáveis de memória)
+        # Variáveis de Estado
         self.pedido_atual: Pedido = None
         self.cliente_selecionado_obj = None
 
@@ -41,28 +38,31 @@ class MainWindow(tk.Tk):
         self.notebook = ttk.Notebook(self)
         self.notebook.pack(fill='both', expand=True, padx=10, pady=10)
 
-        # Criando os frames das abas
+        # Frames das Abas
         self.frame_clientes = tk.Frame(self.notebook)
         self.frame_pedidos = tk.Frame(self.notebook)
+        self.frame_historico = tk.Frame(self.notebook) # Nova Aba
         
         self.notebook.add(self.frame_clientes, text="Gestão de Clientes")
         self.notebook.add(self.frame_pedidos, text="Novo Pedido")
+        self.notebook.add(self.frame_historico, text="Histórico de Vendas") # Nova Aba
 
-        # Configura o conteúdo de cada aba
+        # Setup de cada aba
         self._setup_aba_clientes()
         self._setup_aba_pedidos()
+        self._setup_aba_historico() # Nova função
         
-        # Carrega dados iniciais
+        # Cargas iniciais
         self._atualizar_lista_clientes()
-        self._atualizar_combo_clientes() # Novo
-        self._atualizar_cardapio()       # Novo
+        self._atualizar_combo_clientes()
+        self._atualizar_cardapio()
+        self._atualizar_historico() # Nova função
 
     # =======================================================
     #                   ABA CLIENTES
     # =======================================================
     def _setup_aba_clientes(self):
-        # ... (Mesmo código da Fase 1, mantido aqui para integridade) ...
-        # Painel de Formulário
+        # Formulário
         lbl_frame_form = ttk.LabelFrame(self.frame_clientes, text="Cadastrar Novo Cliente")
         lbl_frame_form.pack(fill='x', padx=10, pady=5)
 
@@ -93,7 +93,7 @@ class MainWindow(tk.Tk):
         btn_salvar = ttk.Button(lbl_frame_form, text="Salvar Cliente", command=self._salvar_cliente)
         btn_salvar.grid(row=2, column=0, columnspan=8, pady=10)
 
-        # Painel de Listagem
+        # Listagem
         lbl_frame_lista = ttk.LabelFrame(self.frame_clientes, text="Clientes Cadastrados")
         lbl_frame_lista.pack(fill='both', expand=True, padx=10, pady=5)
 
@@ -118,21 +118,20 @@ class MainWindow(tk.Tk):
         try:
             nome = self.entry_nome.get()
             tel = self.entry_telefone.get()
-            rua = self.entry_rua.get()
-            num = self.entry_numero.get()
-            bairro = self.entry_bairro.get()
-            cidade = self.entry_cidade.get()
-
+            # ... outros campos
             if not nome or not tel:
                 messagebox.showwarning("Aviso", "Nome e Telefone são obrigatórios!")
                 return
 
-            self.cliente_service.cadastrar_cliente(nome, tel, rua, num, bairro, cidade)
+            self.cliente_service.cadastrar_cliente(
+                nome, tel, self.entry_rua.get(), self.entry_numero.get(), 
+                self.entry_bairro.get(), self.entry_cidade.get()
+            )
             messagebox.showinfo("Sucesso", f"Cliente {nome} cadastrado!")
             
             self._limpar_campos_cliente()
             self._atualizar_lista_clientes()
-            self._atualizar_combo_clientes() # Atualiza também na aba de pedidos!
+            self._atualizar_combo_clientes()
 
         except ValueError as e:
             messagebox.showerror("Erro de Validação", str(e))
@@ -154,10 +153,9 @@ class MainWindow(tk.Tk):
             self.tree_clientes.insert('', 'end', values=(cli.id, cli.nome, cli.telefone, end_str))
 
     # =======================================================
-    #                   ABA PEDIDOS (NOVO!)
+    #                   ABA PEDIDOS
     # =======================================================
     def _setup_aba_pedidos(self):
-        # 1. Seleção de Cliente (Topo)
         frame_topo = tk.Frame(self.frame_pedidos)
         frame_topo.pack(fill='x', padx=10, pady=10)
         
@@ -165,14 +163,12 @@ class MainWindow(tk.Tk):
         
         self.combo_clientes = ttk.Combobox(frame_topo, width=50, state="readonly")
         self.combo_clientes.pack(side='left', padx=10)
-        # Evento: Quando selecionar cliente, inicia um pedido
         self.combo_clientes.bind("<<ComboboxSelected>>", self._on_cliente_selecionado)
 
-        # 2. Área Principal (Split: Cardápio | Ações | Carrinho)
         paned = ttk.PanedWindow(self.frame_pedidos, orient='horizontal')
         paned.pack(fill='both', expand=True, padx=10, pady=5)
 
-        # --- Esquerda: Cardápio ---
+        # Cardápio
         frame_cardapio = ttk.LabelFrame(paned, text="Cardápio")
         paned.add(frame_cardapio, weight=1)
 
@@ -180,16 +176,14 @@ class MainWindow(tk.Tk):
         self.tree_cardapio.heading('nome', text='Produto')
         self.tree_cardapio.heading('preco', text='Preço')
         self.tree_cardapio.heading('tipo', text='Tipo')
-        
         self.tree_cardapio.column('nome', width=150)
         self.tree_cardapio.column('preco', width=80)
         self.tree_cardapio.column('tipo', width=100)
-        
         self.tree_cardapio.pack(fill='both', expand=True, padx=5, pady=5)
 
-        # --- Centro: Botões de Ação ---
+        # Ações
         frame_acoes = tk.Frame(paned)
-        paned.add(frame_acoes, weight=0) # weight 0 para não esticar muito
+        paned.add(frame_acoes, weight=0)
 
         ttk.Label(frame_acoes, text="Qtd:").pack(pady=(50, 5))
         self.entry_qtd = ttk.Entry(frame_acoes, width=5)
@@ -199,7 +193,7 @@ class MainWindow(tk.Tk):
         btn_add = ttk.Button(frame_acoes, text="Adicionar >>", command=self._adicionar_item)
         btn_add.pack(pady=20, padx=10)
 
-        # --- Direita: Carrinho ---
+        # Carrinho
         frame_carrinho = ttk.LabelFrame(paned, text="Carrinho do Pedido")
         paned.add(frame_carrinho, weight=1)
 
@@ -207,73 +201,51 @@ class MainWindow(tk.Tk):
         self.tree_carrinho.heading('produto', text='Produto')
         self.tree_carrinho.heading('qtd', text='Qtd')
         self.tree_carrinho.heading('subtotal', text='Subtotal')
-        
         self.tree_carrinho.column('produto', width=150)
         self.tree_carrinho.column('qtd', width=50)
         self.tree_carrinho.column('subtotal', width=80)
-
         self.tree_carrinho.pack(fill='both', expand=True, padx=5, pady=5)
 
-        # 3. Rodapé (Total e Finalizar)
+        # Footer
         frame_footer = tk.Frame(self.frame_pedidos, bg="#f0f0f0")
         frame_footer.pack(fill='x', padx=10, pady=10)
 
         self.lbl_total = ttk.Label(frame_footer, text="TOTAL: R$ 0.00", font=('Arial', 14, 'bold'), background="#f0f0f0")
         self.lbl_total.pack(side='right', padx=20)
 
-        # Botão de finalizar deixaremos desativado até ter itens
-        self.btn_finalizar = ttk.Button(frame_footer, text="Finalizar Pagamento", state="disabled")
+        # AGORA CONECTADO AO MÉTODO DE PAGAMENTO
+        self.btn_finalizar = ttk.Button(frame_footer, text="Finalizar Pagamento", state="disabled", command=self._abrir_janela_pagamento)
         self.btn_finalizar.pack(side='right')
 
-    # --- Lógica da Aba Pedidos ---
-
     def _atualizar_combo_clientes(self):
-        """Popula o combobox com a lista de clientes (Cache em memória)"""
-        # Reutiliza o cache da lista
         self.lista_clientes_cache = self.cliente_service.listar_clientes()
-        
-        valores_combo = []
-        for c in self.lista_clientes_cache:
-            valores_combo.append(f"{c.nome} ({c.telefone})")
-        
-        self.combo_clientes['values'] = valores_combo
+        valores = [f"{c.nome} ({c.telefone})" for c in self.lista_clientes_cache]
+        self.combo_clientes['values'] = valores
 
     def _atualizar_cardapio(self):
-        """Busca produtos do repo e põe no Treeview"""
         self.cardapio_cache = self.produto_repo.buscar_todos()
-        
         for item in self.tree_cardapio.get_children():
             self.tree_cardapio.delete(item)
-            
         for i, prod in enumerate(self.cardapio_cache):
-            # Usamos o índice da lista (i) como ID no treeview (iid) para achar fácil depois
-            tipo_nome = type(prod).__name__ # Pega 'Hamburguer', 'Bebida', etc
-            self.tree_cardapio.insert('', 'end', iid=i, values=(prod.nome, f"R$ {prod.preco:.2f}", tipo_nome))
+            tipo = type(prod).__name__
+            self.tree_cardapio.insert('', 'end', iid=i, values=(prod.nome, f"R$ {prod.preco:.2f}", tipo))
 
     def _on_cliente_selecionado(self, event):
-        """Chamado quando usuário escolhe um cliente no Combo"""
         idx = self.combo_clientes.current()
         if idx >= 0:
             cliente = self.lista_clientes_cache[idx]
             self.cliente_selecionado_obj = cliente
-            
-            # Cria um NOVO pedido em memória para esse cliente
             self.pedido_atual = self.pedido_service.criar_pedido(cliente)
-            
-            # Limpa visualização do carrinho anterior
             self._atualizar_carrinho_view()
-            print(f"Pedido iniciado para {cliente.nome}")
 
     def _adicionar_item(self):
-        """Lógica do botão Adicionar >>"""
-        # 1. Validações
         if not self.pedido_atual:
-            messagebox.showwarning("Atenção", "Selecione um cliente primeiro para iniciar o pedido.")
+            messagebox.showwarning("Atenção", "Selecione um cliente primeiro.")
             return
 
-        selecionado = self.tree_cardapio.focus() # Pega o ID (iid) do item selecionado
+        selecionado = self.tree_cardapio.focus()
         if not selecionado:
-            messagebox.showwarning("Atenção", "Selecione um produto no cardápio.")
+            messagebox.showwarning("Atenção", "Selecione um produto.")
             return
         
         try:
@@ -283,46 +255,123 @@ class MainWindow(tk.Tk):
             messagebox.showwarning("Erro", "Quantidade inválida.")
             return
 
-        # 2. Recupera o objeto Produto real da lista cache
-        idx_produto = int(selecionado)
-        produto_obj = self.cardapio_cache[idx_produto]
-
-        # 3. Adiciona ao Pedido (Lógica de Negócio)
-        self.pedido_service.adicionar_item(self.pedido_atual, produto_obj, qtd)
-
-        # 4. Atualiza a tela
+        idx = int(selecionado)
+        produto = self.cardapio_cache[idx]
+        self.pedido_service.adicionar_item(self.pedido_atual, produto, qtd)
         self._atualizar_carrinho_view()
 
     def _atualizar_carrinho_view(self):
-        """Reconstroi a lista do carrinho baseada no objeto self.pedido_atual"""
-        # Limpa lista visual
         for item in self.tree_carrinho.get_children():
             self.tree_carrinho.delete(item)
         
-        # Reseta se não tiver pedido
         if not self.pedido_atual:
             self.lbl_total.config(text="TOTAL: R$ 0.00")
             self.btn_finalizar.config(state="disabled")
             return
 
-        # Preenche lista
-        # Nota: Acessando _itens diretamente para leitura na View (Pragmatismo UI)
-        for item_pedido in self.pedido_atual._itens:
-            self.tree_carrinho.insert('', 'end', values=(
-                item_pedido.produto.nome,
-                item_pedido.quantidade,
-                f"R$ {item_pedido.subtotal:.2f}"
-            ))
+        for item in self.pedido_atual._itens:
+            self.tree_carrinho.insert('', 'end', values=(item.produto.nome, item.quantidade, f"R$ {item.subtotal:.2f}"))
         
-        # Atualiza Total
         total = self.pedido_atual.total
         self.lbl_total.config(text=f"TOTAL: R$ {total:.2f}")
-
-        # Habilita botão se tiver itens
+        
         if total > 0:
             self.btn_finalizar.config(state="normal")
         else:
             self.btn_finalizar.config(state="disabled")
+
+    # =======================================================
+    #            LÓGICA DE PAGAMENTO (NOVO!)
+    # =======================================================
+
+    def _abrir_janela_pagamento(self):
+        """Abre um pop-up (Toplevel) para escolher a forma de pagamento"""
+        if not self.pedido_atual or self.pedido_atual.total <= 0:
+            return
+
+        janela_pgto = Toplevel(self)
+        janela_pgto.title("Finalizar Pedido")
+        janela_pgto.geometry("300x200")
+        janela_pgto.grab_set() # Foca na janela e impede clique na janela principal
+
+        ttk.Label(janela_pgto, text=f"Total a Pagar: R$ {self.pedido_atual.total:.2f}", font=('Arial', 12, 'bold')).pack(pady=20)
+        ttk.Label(janela_pgto, text="Escolha a forma de pagamento:").pack(pady=5)
+
+        frame_botoes = tk.Frame(janela_pgto)
+        frame_botoes.pack(pady=10)
+
+        # Botões que chamam o método de conclusão com o argumento da string
+        ttk.Button(frame_botoes, text="Dinheiro", command=lambda: self._concluir_pagamento("Dinheiro", janela_pgto)).pack(fill='x', pady=2)
+        ttk.Button(frame_botoes, text="Cartão", command=lambda: self._concluir_pagamento("Cartão", janela_pgto)).pack(fill='x', pady=2)
+        ttk.Button(frame_botoes, text="Pix", command=lambda: self._concluir_pagamento("Pix", janela_pgto)).pack(fill='x', pady=2)
+
+    def _concluir_pagamento(self, forma: str, janela: Toplevel):
+        """Finaliza o pedido no Service e atualiza a UI"""
+        try:
+            sucesso = self.pedido_service.finalizar_pedido(self.pedido_atual, forma)
+            
+            if sucesso:
+                janela.destroy() # Fecha o pop-up
+                messagebox.showinfo("Sucesso", f"Pagamento via {forma} confirmado!\nPedido Salvo.")
+                
+                # Reseta o fluxo de pedido
+                self.pedido_atual = None
+                self.combo_clientes.set('')
+                self.cliente_selecionado_obj = None
+                self._atualizar_carrinho_view()
+                
+                # Atualiza o histórico
+                self._atualizar_historico()
+                # Muda o foco para a aba de histórico para o usuário ver
+                self.notebook.select(self.frame_historico)
+            else:
+                messagebox.showerror("Erro", "Falha ao processar pagamento.")
+        
+        except Exception as e:
+            messagebox.showerror("Erro Crítico", f"Erro: {e}")
+
+    # =======================================================
+    #            ABA HISTÓRICO (NOVO!)
+    # =======================================================
+    
+    def _setup_aba_historico(self):
+        # Botão de Atualizar
+        btn_refresh = ttk.Button(self.frame_historico, text="🔄 Atualizar Lista", command=self._atualizar_historico)
+        btn_refresh.pack(pady=10, padx=10, anchor='e')
+
+        # Tabela
+        colunas = ('id', 'cliente', 'total', 'status')
+        self.tree_historico = ttk.Treeview(self.frame_historico, columns=colunas, show='headings')
+        
+        self.tree_historico.heading('id', text='ID Pedido')
+        self.tree_historico.heading('cliente', text='Cliente')
+        self.tree_historico.heading('total', text='Total')
+        self.tree_historico.heading('status', text='Status')
+        
+        self.tree_historico.column('id', width=50, anchor='center')
+        self.tree_historico.column('cliente', width=200)
+        self.tree_historico.column('total', width=100)
+        self.tree_historico.column('status', width=100, anchor='center')
+
+        scrollbar = ttk.Scrollbar(self.frame_historico, orient="vertical", command=self.tree_historico.yview)
+        self.tree_historico.configure(yscroll=scrollbar.set)
+        
+        self.tree_historico.pack(fill='both', expand=True, padx=10, pady=5)
+        scrollbar.pack(side='right', fill='y')
+
+    def _atualizar_historico(self):
+        # Limpa
+        for item in self.tree_historico.get_children():
+            self.tree_historico.delete(item)
+            
+        # Busca
+        # Precisamos passar a lista de clientes para o repo reconstruir os objetos
+        clientes = self.cliente_service.listar_clientes()
+        pedidos = self.pedido_service.listar_pedidos(clientes)
+        
+        # Preenche
+        for p in pedidos:
+            self.tree_historico.insert('', 'end', values=(p.id, p.cliente.nome, f"R$ {p.total:.2f}", p.status))
 
 if __name__ == "__main__":
     from database import init_db
