@@ -82,7 +82,11 @@ hamburgueria-poo/
 ├── views/               # Camada de Apresentação
 │   ├── console_view.py     # Interface CLI
 │   └── gui/                # Interface Gráfica (Tkinter)
-│       └── main_window.py
+│       ├── main_window.py  # Orquestrador da Janela
+│       └── abas/           # Módulos da Interface
+│           ├── aba_clientes.py
+│           ├── aba_historico.py
+│           └── aba_pedidos.py
 │
 ├── controllers/         # Orquestradores (Legacy/Console)
 ├── database.py          # Configuração do SQLite
