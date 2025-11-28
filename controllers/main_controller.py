@@ -3,7 +3,7 @@ from services.pedido_service import PedidoService
 from repositories.cliente_repository import ClienteRepository
 from repositories.pedido_repository import PedidoRepository
 from models.processador_pagamento import ProcessadorPagamento
-from views.console_view import ConsoleView
+from views.console.console_view import ConsoleView
 from models.hamburguer import Hamburguer
 from models.bebida import Bebida
 from repositories.produto_repository import ProdutoRepository
