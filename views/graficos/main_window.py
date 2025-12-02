@@ -12,9 +12,9 @@ from services.cliente_service import ClienteService
 from services.pedido_service import PedidoService
 from models.processador_pagamento import ProcessadorPagamento
 
-from views.gui.abas.aba_clientes import AbaClientes
-from views.gui.abas.aba_pedidos import AbaPedidos
-from views.gui.abas.aba_historico import AbaHistorico
+from views.graficos.abas.aba_clientes import AbaClientes
+from views.graficos.abas.aba_pedidos import AbaPedidos
+from views.graficos.abas.aba_historico import AbaHistorico
 
 class MainWindow(tk.Tk):
     def __init__(self):

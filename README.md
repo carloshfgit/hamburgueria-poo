@@ -75,13 +75,13 @@ hamburgueria-poo/
 │   ├── cliente_repository.py
 │   └── pedido_repository.py
 │
-├── services/            # Regras de Negócio (Lógica Pura)
+├── services/               # Regras de Negócio (Lógica Pura)
 │   ├── cliente_service.py  # Ex: Validação de duplicidade
 │   └── pedido_service.py   # Orquestração do pedido
 │
 ├── views/               # Camada de Apresentação
 │   ├── console_view.py     # Interface CLI
-│   └── gui/                # Interface Gráfica (Tkinter)
+│   └── graficos/           # Interface Gráfica (Tkinter)
 │       ├── main_window.py  # Orquestrador da Janela
 │       └── abas/           # Módulos da Interface
 │           ├── aba_clientes.py
