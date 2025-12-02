@@ -1,3 +1,5 @@
+#INTERFACE PURA
+#apenas entrada e saída, sem lógica complexa de fluxo
 from typing import List, Dict, Any
 from models.cliente import Cliente
 from models.pedido import Pedido

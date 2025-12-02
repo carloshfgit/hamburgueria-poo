@@ -1,6 +1,5 @@
 class Cliente:
 
-    #usa o objeto endereço como atributo de cliente
     def __init__(self, nome: str, telefone: str, cidade: str, id: int = None):
         self._id = id
         self._nome = nome

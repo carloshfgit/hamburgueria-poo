@@ -1,3 +1,6 @@
+#LÓGICA DE DATABASE | SQL
+#transforma os objetos python em comandos SQL para persistência no banco
+
 from typing import List, Dict
 from models.pedido import Pedido
 from models.item_pedido import ItemPedido

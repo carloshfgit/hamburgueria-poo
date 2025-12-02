@@ -15,17 +15,6 @@ def init_db():
     conn = get_db_connection()
     cursor = conn.cursor()
     
-    # Tabela para Endereços
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS enderecos (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        rua TEXT NOT NULL,
-        numero TEXT,
-        bairro TEXT NOT NULL,
-        cidade TEXT NOT NULL
-    )
-    """)
-    
     # Tabela para Clientes
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS clientes (
@@ -48,7 +37,6 @@ def init_db():
     """)
     
     # Tabela para Itens de um Pedido
-    # Adicionamos 'produto_tipo' e 'produto_detalhes'
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS itens_pedido (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -63,7 +51,6 @@ def init_db():
     """)
 
     # Tabela para Produtos (Cardápio)
-    # Colocamos colunas para TODOS os tipos. Se for bebida, ingredientes fica NULL.
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS produtos (
         id INTEGER PRIMARY KEY AUTOINCREMENT,

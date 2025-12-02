@@ -1,3 +1,5 @@
+#ESSE ARQUIVO ATUA COMO O CÉREBRO DO CONSOLE_VIEW
+#decisão lógica de fluxo
 from services.cliente_service import ClienteService
 from services.pedido_service import PedidoService
 from repositories.cliente_repository import ClienteRepository
@@ -23,6 +25,7 @@ class MainController:
         self.produto_repo.salvar_padroes_se_vazio()
         self.cardapio = self.produto_repo.buscar_todos()
 
+    
     def iniciar(self):
         while True:
             opcao = self.view.exibir_menu_principal()
@@ -50,7 +53,6 @@ class MainController:
     def _fluxo_cadastrar_cliente(self):
         dados = self.view.obter_dados_cliente()
         try:
-            # Chamada simplificada: Apenas Nome, Telefone e Cidade
             cliente = self.cliente_service.cadastrar_cliente(
                 nome=dados['nome'], 
                 telefone=dados['telefone'],
@@ -73,10 +75,8 @@ class MainController:
         if not cliente_selecionado:
             return
 
-        # 2. Criar Pedido
         pedido = self.pedido_service.criar_pedido(cliente_selecionado)
         
-        # 3. Loop de Produtos
         while True:
             produto = self.view.selecionar_produto(self.cardapio)
             if not produto:
@@ -91,7 +91,6 @@ class MainController:
             self.view.mostrar_mensagem("Pedido vazio cancelado.")
             return
 
-        # 4. Pagamento
         self.view.mostrar_resumo_pedido(pedido)
         forma_pgto = self.view.obter_forma_pagamento()
         

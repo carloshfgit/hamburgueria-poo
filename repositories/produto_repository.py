@@ -1,3 +1,6 @@
+#LÓGICA DE DATABASE | SQL
+#transforma os objetos python em comandos SQL para persistência no banco
+
 from typing import List
 from database import get_db_connection
 from models.produto import Produto
@@ -17,9 +20,8 @@ class ProdutoRepository:
         cardapio = []
         for row in rows:
             tipo = row['tipo']
-            # Reconstrói o objeto certo baseado no tipo salvo (Polimorfismo na veia!)
+        
             if tipo == 'Hamburguer':
-                # Ingredientes salvos como texto "Pão,Carne", convertemos de volta para lista
                 ingredientes_list = row['ingredientes'].split(",") if row['ingredientes'] else []
                 prod = Hamburguer(row['nome'], row['preco'], row['descricao'], ingredientes_list)
             elif tipo == 'Bebida':
@@ -27,10 +29,8 @@ class ProdutoRepository:
             elif tipo == 'Acompanhamento':
                 prod = Acompanhamento(row['nome'], row['preco'], row['descricao'], row['tamanho'])
             else:
-                continue # Pula tipos desconhecidos
-            
-            # (Opcional) Se quiser salvar o ID no objeto para uso futuro
-            # prod._id = row['id'] 
+                continue 
+        
             cardapio.append(prod)
             
         return cardapio
@@ -43,7 +43,6 @@ class ProdutoRepository:
         cursor.execute("SELECT count(*) FROM produtos")
         if cursor.fetchone()[0] == 0:
             print("Populando cardápio inicial no banco...")
-            # Inserindo dados iniciais (Seed)
             lista = [
                 ('Hamburguer', 'X-Monstro', 25.50, 'Completo', 'Bacon,Ovo,Queijo', None, None),
                 ('Bebida', 'Coca-Cola', 8.00, 'Lata', None, 350, None),
