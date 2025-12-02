@@ -1,3 +1,4 @@
+#ESSE ARQUIVO CONTROLA A TELA DE CADASTRO E CONSULTA DE CLIENTES
 import tkinter as tk
 from tkinter import ttk, messagebox
 
@@ -10,37 +11,37 @@ class AbaClientes(tk.Frame):
         super().__init__(parent)
         self.service = service
         
-        # Constrói a Interface
+        #levanta a interface
         self._setup_ui()
         
-        # Carrega dados iniciais
+        #carrega dados iniciais
         self._atualizar_lista_clientes()
 
     def _setup_ui(self):
-        # Formulário
+        #formulario
         lbl_frame_form = ttk.LabelFrame(self, text="Cadastrar Novo Cliente")
         lbl_frame_form.pack(fill='x', padx=10, pady=5)
 
-        # Linha 0: Nome
+        #nome
         ttk.Label(lbl_frame_form, text="Nome:").grid(row=0, column=0, padx=5, pady=5, sticky='e')
         self.entry_nome = ttk.Entry(lbl_frame_form, width=30)
         self.entry_nome.grid(row=0, column=1, padx=5, pady=5)
 
-        # Linha 0: Telefone
+        #telefone
         ttk.Label(lbl_frame_form, text="Telefone:").grid(row=0, column=2, padx=5, pady=5, sticky='e')
         self.entry_telefone = ttk.Entry(lbl_frame_form, width=20)
         self.entry_telefone.grid(row=0, column=3, padx=5, pady=5)
 
-        # Linha 1: Cidade
+        #cidade
         ttk.Label(lbl_frame_form, text="Cidade:").grid(row=1, column=0, padx=5, pady=5, sticky='e')
         self.entry_cidade = ttk.Entry(lbl_frame_form, width=30)
         self.entry_cidade.grid(row=1, column=1, padx=5, pady=5, sticky='w')
 
-        # Botão Salvar
+        #botao salavar
         btn_salvar = ttk.Button(lbl_frame_form, text="Salvar Cliente", command=self._salvar_cliente)
         btn_salvar.grid(row=2, column=0, columnspan=4, pady=10)
 
-        # Listagem
+        #listar
         lbl_frame_lista = ttk.LabelFrame(self, text="Clientes Cadastrados")
         lbl_frame_lista.pack(fill='both', expand=True, padx=10, pady=5)
 
@@ -71,15 +72,12 @@ class AbaClientes(tk.Frame):
                 messagebox.showwarning("Aviso", "Todos os campos (Nome, Telefone, Cidade) são obrigatórios!")
                 return
 
-            # Uso do service injetado
             self.service.cadastrar_cliente(nome, tel, cidade)
             
             messagebox.showinfo("Sucesso", f"Cliente {nome} cadastrado!")
             
             self._limpar_campos_cliente()
             self._atualizar_lista_clientes()
-            
-            # Nota: A atualização do combobox de pedidos será tratada via callback ou recarga na etapa de integração
             
         except ValueError as e:
             messagebox.showerror("Erro de Validação", str(e))
@@ -93,8 +91,7 @@ class AbaClientes(tk.Frame):
     def _atualizar_lista_clientes(self):
         for item in self.tree_clientes.get_children():
             self.tree_clientes.delete(item)
-        
-        # Busca direta do service
+ 
         lista_clientes = self.service.listar_clientes()
         
         for cli in lista_clientes:

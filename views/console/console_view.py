@@ -22,8 +22,6 @@ class ConsoleView:
         print("5. Cancelar Pedido")
         print("0. Sair do Sistema")
         return input("Escolha uma opção: ").strip()
-
-    # --- CLIENTES ---
     
     def obter_dados_cliente(self) -> Dict[str, str]:
         """Coleta dados simplificados do usuário."""
@@ -31,7 +29,6 @@ class ConsoleView:
         dados = {}
         dados['nome'] = input("Nome do cliente: ")
         dados['telefone'] = input("Telefone (ex: 11987654321): ")
-        # Agora pedimos apenas a cidade
         dados['cidade'] = input("Cidade: ")
         return dados
 
@@ -42,7 +39,6 @@ class ConsoleView:
             return
 
         for i, cliente in enumerate(clientes):
-            # Exibição simplificada usando o atributo cidade direto
             print(f"{i + 1}. {cliente.nome} ({cliente.telefone}) - {cliente.cidade}")
 
     def selecionar_cliente(self, clientes: List[Cliente]) -> Any:
@@ -61,8 +57,6 @@ class ConsoleView:
         except ValueError:
             pass
         return None
-
-    # --- PEDIDOS ---
 
     def selecionar_produto(self, cardapio: List[Produto]) -> Any:
         print("\n--- Cardápio ---")

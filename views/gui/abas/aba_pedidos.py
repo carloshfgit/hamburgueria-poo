@@ -1,7 +1,7 @@
+#ESSE ARQUIVO CONTROLA A TELA DE PEDIDOS
+#esta é a aba mais complexa, onde ocorre a venda, ela gerencia o fluxo de criar um pedido do zero
 import tkinter as tk
 from tkinter import ttk, messagebox, Toplevel
-
-# Precisamos importar o Model para type hinting (opcional, mas ajuda na leitura)
 from models.pedido import Pedido
 
 class AbaPedidos(tk.Frame):
@@ -19,21 +19,20 @@ class AbaPedidos(tk.Frame):
         self.repo_produto = repo_produto
         self.on_pedido_salvo_callback = on_pedido_salvo_callback
 
-        # Variáveis de Estado Local
         self.pedido_atual: Pedido = None
         self.cliente_selecionado_obj = None
         self.lista_clientes_cache = []
         self.cardapio_cache = []
 
-        # Monta a tela
+        #levanta a tela
         self._setup_ui()
         
-        # Carrega dados iniciais
+        #carrega dados iniciais
         self.atualizar_combo_clientes()
         self.atualizar_cardapio()
 
     def _setup_ui(self):
-        # Frame do Topo (Seleção de Cliente)
+        #seleção de cliente
         frame_topo = tk.Frame(self)
         frame_topo.pack(fill='x', padx=10, pady=10)
         
@@ -43,11 +42,10 @@ class AbaPedidos(tk.Frame):
         self.combo_clientes.pack(side='left', padx=10)
         self.combo_clientes.bind("<<ComboboxSelected>>", self._on_cliente_selecionado)
 
-        # Divisão PanedWindow (Cardápio | Ações | Carrinho)
         paned = ttk.PanedWindow(self, orient='horizontal')
         paned.pack(fill='both', expand=True, padx=10, pady=5)
 
-        # 1. Cardápio
+        #cardapio
         frame_cardapio = ttk.LabelFrame(paned, text="Cardápio")
         paned.add(frame_cardapio, weight=1)
 
@@ -60,7 +58,7 @@ class AbaPedidos(tk.Frame):
         self.tree_cardapio.column('tipo', width=100)
         self.tree_cardapio.pack(fill='both', expand=True, padx=5, pady=5)
 
-        # 2. Ações (Meio)
+        #ações
         frame_acoes = tk.Frame(paned)
         paned.add(frame_acoes, weight=0)
 
@@ -72,7 +70,7 @@ class AbaPedidos(tk.Frame):
         btn_add = ttk.Button(frame_acoes, text="Adicionar >>", command=self._adicionar_item)
         btn_add.pack(pady=20, padx=10)
 
-        # 3. Carrinho
+        #carrinho
         frame_carrinho = ttk.LabelFrame(paned, text="Carrinho do Pedido")
         paned.add(frame_carrinho, weight=1)
 
@@ -85,7 +83,7 @@ class AbaPedidos(tk.Frame):
         self.tree_carrinho.column('subtotal', width=80)
         self.tree_carrinho.pack(fill='both', expand=True, padx=5, pady=5)
 
-        # Footer (Totais e Botão Finalizar)
+        #total e botao finalizar
         frame_footer = tk.Frame(self, bg="#f0f0f0")
         frame_footer.pack(fill='x', padx=10, pady=10)
 
@@ -95,14 +93,13 @@ class AbaPedidos(tk.Frame):
         self.btn_finalizar = ttk.Button(frame_footer, text="Finalizar Pagamento", state="disabled", command=self._abrir_janela_pagamento)
         self.btn_finalizar.pack(side='right')
 
-    # --- Lógica de Carregamento de Dados ---
-
+    #logica de carregamento de dados
     def atualizar_combo_clientes(self):
-        # Método público para ser chamado quando um novo cliente for cadastrado
+        
         self.lista_clientes_cache = self.service_cliente.listar_clientes()
         valores = [f"{c.nome} ({c.telefone}) - {c.cidade}" for c in self.lista_clientes_cache]
         self.combo_clientes['values'] = valores
-        # Se havia seleção, limpa (pois a lista mudou)
+        
         self.combo_clientes.set('')
         self.pedido_atual = None
         self._atualizar_carrinho_view()
@@ -115,14 +112,12 @@ class AbaPedidos(tk.Frame):
             tipo = type(prod).__name__
             self.tree_cardapio.insert('', 'end', iid=i, values=(prod.nome, f"R$ {prod.preco:.2f}", tipo))
 
-    # --- Eventos de Interação ---
-
+    #eventos de interaçao
     def _on_cliente_selecionado(self, event):
         idx = self.combo_clientes.current()
         if idx >= 0:
             cliente = self.lista_clientes_cache[idx]
             self.cliente_selecionado_obj = cliente
-            # Cria um novo pedido em branco usando o Service
             self.pedido_atual = self.service_pedido.criar_pedido(cliente)
             self._atualizar_carrinho_view()
 
@@ -170,8 +165,7 @@ class AbaPedidos(tk.Frame):
         else:
             self.btn_finalizar.config(state="disabled")
 
-    # --- Pagamento ---
-
+    #pagamento
     def _abrir_janela_pagamento(self):
         if not self.pedido_atual or self.pedido_atual.total <= 0:
             return
@@ -187,7 +181,7 @@ class AbaPedidos(tk.Frame):
         frame_botoes = tk.Frame(janela_pgto)
         frame_botoes.pack(pady=10)
 
-        # Funções lambda para passar a forma de pagamento
+        #gorma de pagamento
         ttk.Button(frame_botoes, text="Dinheiro", command=lambda: self._concluir_pagamento("Dinheiro", janela_pgto)).pack(fill='x', pady=2)
         ttk.Button(frame_botoes, text="Cartão", command=lambda: self._concluir_pagamento("Cartão", janela_pgto)).pack(fill='x', pady=2)
         ttk.Button(frame_botoes, text="Pix", command=lambda: self._concluir_pagamento("Pix", janela_pgto)).pack(fill='x', pady=2)
@@ -200,13 +194,11 @@ class AbaPedidos(tk.Frame):
                 janela.destroy() 
                 messagebox.showinfo("Sucesso", f"Pagamento via {forma} confirmado!\nPedido Salvo.")
                 
-                # Reseta o estado local
                 self.pedido_atual = None
                 self.combo_clientes.set('')
                 self.cliente_selecionado_obj = None
                 self._atualizar_carrinho_view()
                 
-                # NOTIFICA A APP PRINCIPAL QUE TERMINOU (Observer Pattern simplificado)
                 if self.on_pedido_salvo_callback:
                     self.on_pedido_salvo_callback()
             else:
